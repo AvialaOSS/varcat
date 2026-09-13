@@ -48,6 +48,8 @@ export type Vocabulary = {
   charset: string;
   rules: Array<{ id: string; title: string; detail: string }>;
   pluralSafeSlots: string[];
+  /** Retired component type → its Spiral replacement, or null when there is none. */
+  retiredTypes: Record<string, string | null>;
   namespaces: Record<NamespaceKey, Namespace>;
 };
 
@@ -115,11 +117,14 @@ export const vocabulary: Vocabulary = {
   charset: raw.charset,
   rules: raw.rules,
   pluralSafeSlots: raw.pluralSafeSlots,
+  retiredTypes: raw.retiredTypes ?? {},
   namespaces: NAMESPACE_KEYS.reduce((acc, key) => {
     acc[key] = resolveNamespace(key);
     return acc;
   }, {} as Record<NamespaceKey, Namespace>)
 };
+
+export const retiredTypes: Record<string, string | null> = vocabulary.retiredTypes;
 
 export const semanticAliases = semanticAliasesJson as SemanticAliasTable;
 export const componentMatrix = componentMatrixJson as ComponentMatrix;

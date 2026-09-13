@@ -7,6 +7,7 @@ import {
   componentMatrix,
   getNamespace,
   NAMESPACE_KEYS,
+  retiredTypes,
   vocabulary,
   type Namespace,
   type NamespaceKey
@@ -24,7 +25,11 @@ export type IssueCode =
   | 'unknownNamespace'
   | 'unknownSlotValue'
   | 'matrixViolation'
-  | 'notWhitelisted';
+  | 'notWhitelisted'
+  /** The word is legal somewhere, but not in the selected template's axis. */
+  | 'notInTemplate'
+  /** A component type VarCat used to accept and Spiral does not have. */
+  | 'retiredType';
 
 export type Issue = {
   code: IssueCode;
@@ -153,6 +158,24 @@ const parseSlots = (namespace: Namespace, path: string): Record<string, string> 
   return slots;
 };
 
+/**
+ * Component types VarCat accepted before the vocabulary moved to the Spiral
+ * catalog. Renaming a variable breaks the bindings a designer already made, so
+ * this is a report with a suggestion, never a rewrite.
+ */
+const retiredTypeIssue = (path: string): Issue | null => {
+  const group = normalizeVariablePath(path).split('/')[0];
+  if (!(group in retiredTypes)) return null;
+  const replacement = retiredTypes[group];
+  return issue(
+    'retiredType',
+    replacement
+      ? `component type "${group}" was retired; Spiral calls it "${replacement}" — rename the group by hand to keep the bindings`
+      : `component type "${group}" was retired and has no Spiral equivalent`,
+    { slot: 'type', value: group }
+  );
+};
+
 const whitelistPaths = (namespace: Namespace): Set<string> | null => {
   if (namespace.key !== 'component') return null;
   return new Set(componentMatrix.entries.map((entry) => entry.path));
@@ -173,6 +196,11 @@ export const validateInNamespace = (path: string, key: NamespaceKey): Validation
       )
     );
     return { path: normalized, valid: false, namespace: key, issues };
+  }
+
+  if (key === 'component') {
+    const retired = retiredTypeIssue(normalized);
+    if (retired) issues.push(retired);
   }
 
   for (const [slot, value] of Object.entries(slots)) {
@@ -252,6 +280,11 @@ export const validateVariablePath = (
   const key = options?.namespace ?? detectNamespace(normalized);
   if (!key) {
     const issues = validateStructure(normalized);
+    const retired = retiredTypeIssue(normalized);
+    if (retired) {
+      issues.push(retired);
+      return { path: normalized, valid: false, issues };
+    }
     issues.push(
       issue(
         'unknownNamespace',
