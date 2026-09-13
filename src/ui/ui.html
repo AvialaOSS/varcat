@@ -22,9 +22,15 @@
         font-size: 13px;
       }
 
-      p.lede {
-        margin: 0 0 12px;
+      p.lede,
+      p.hint {
+        margin: 0 0 8px;
         color: var(--figma-color-text-secondary);
+      }
+
+      p.hint {
+        margin: 0 0 10px;
+        color: var(--figma-color-text-tertiary);
       }
 
       fieldset {
@@ -39,55 +45,200 @@
         font-weight: 600;
       }
 
-      ul.namespaces {
+      /* Step bar */
+      ol.steps {
+        display: flex;
+        gap: 4px;
+        margin: 0 0 10px;
+        padding: 0;
+        list-style: none;
+      }
+
+      ol.steps li {
+        flex: 1;
+        padding: 5px 6px;
+        text-align: center;
+        color: var(--figma-color-text-tertiary);
+        background: var(--figma-color-bg-secondary);
+        border: 1px solid transparent;
+        border-radius: 5px;
+        cursor: pointer;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      ol.steps li.current {
+        color: var(--figma-color-text);
+        font-weight: 600;
+        border-color: var(--figma-color-border-brand-strong, var(--figma-color-border));
+      }
+
+      ol.steps li.locked {
+        opacity: 0.45;
+        cursor: default;
+      }
+
+      section.step {
+        display: none;
+      }
+
+      section.step.current {
+        display: block;
+      }
+
+      /* Template picker */
+      .searchRow {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+
+      .group {
+        margin-bottom: 6px;
+        border: 1px solid var(--figma-color-border);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+
+      .group > summary {
+        padding: 5px 8px;
+        font-weight: 600;
+        background: var(--figma-color-bg-secondary);
+        cursor: pointer;
+      }
+
+      .group > summary .count {
+        float: right;
+        font-weight: 400;
+        color: var(--figma-color-text-tertiary);
+      }
+
+      ul.rows {
         margin: 0;
         padding: 0;
         list-style: none;
       }
 
-      ul.namespaces li {
+      ul.rows li {
         display: flex;
         gap: 6px;
         align-items: baseline;
-        padding: 3px 0;
+        padding: 4px 8px;
+        border-top: 1px solid var(--figma-color-border);
       }
 
-      ul.namespaces code {
+      ul.rows li label {
+        cursor: pointer;
+      }
+
+      ul.rows code,
+      .axisPanel code {
         color: var(--figma-color-text-secondary);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+
+      .stub {
+        padding: 0 4px;
+        color: var(--figma-color-text-tertiary);
+        border: 1px solid var(--figma-color-border);
+        border-radius: 3px;
       }
 
       .meta {
         margin-left: auto;
         color: var(--figma-color-text-tertiary);
+        white-space: nowrap;
       }
 
-      .seeds {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 6px;
+      /* Axis panel */
+      .axisPanel {
+        margin-bottom: 10px;
+        padding: 8px;
+        border: 1px solid var(--figma-color-border);
+        border-radius: 6px;
       }
 
-      label.seed {
+      .axisPanel h3 {
+        margin: 0 0 2px;
+        font-size: 12px;
+      }
+
+      .axis {
+        margin-top: 6px;
+      }
+
+      .axis > .axisLabel {
+        display: block;
+        margin-bottom: 3px;
+        color: var(--figma-color-text-secondary);
+      }
+
+      .chips {
         display: flex;
-        gap: 6px;
-        align-items: center;
-        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 4px;
       }
 
-      input[type='text'] {
-        width: 90px;
-        padding: 3px 5px;
+      .chip {
+        padding: 2px 7px;
         color: var(--figma-color-text);
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
         background: var(--figma-color-bg-secondary);
         border: 1px solid var(--figma-color-border);
-        border-radius: 4px;
+        border-radius: 10px;
+        cursor: pointer;
       }
 
+      .chip.on {
+        color: var(--figma-color-text-onbrand);
+        background: var(--figma-color-bg-brand);
+        border-color: transparent;
+      }
+
+      .panelFoot {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        margin-top: 8px;
+      }
+
+      .panelFoot .tally {
+        margin-left: auto;
+        font-weight: 600;
+      }
+
+      .panelFoot button {
+        flex: none;
+        padding: 3px 7px;
+        font-weight: 400;
+      }
+
+      .warn {
+        color: var(--figma-color-text-warning, #b26a00);
+      }
+
+      .danger {
+        color: var(--figma-color-text-danger);
+      }
+
+      .banner {
+        margin: 0 0 8px;
+        padding: 6px 8px;
+        border-radius: 5px;
+        background: var(--figma-color-bg-warning-tertiary, var(--figma-color-bg-secondary));
+        border: 1px solid var(--figma-color-border);
+      }
+
+      .banner.hidden {
+        display: none;
+      }
+
+      /* Buttons */
       .actions {
         display: flex;
         gap: 6px;
-        margin-bottom: 10px;
+        margin: 10px 0;
       }
 
       button {
@@ -112,10 +263,53 @@
         cursor: default;
       }
 
-      #output {
+      input[type='text'],
+      input[type='search'] {
+        flex: 1;
+        min-width: 0;
+        padding: 3px 5px;
+        color: var(--figma-color-text);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        background: var(--figma-color-bg-secondary);
+        border: 1px solid var(--figma-color-border);
+        border-radius: 4px;
+      }
+
+      .seeds {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      label.seed {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      label.seed input[type='text'] {
+        flex: none;
+        width: 90px;
+      }
+
+      label.toggle {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        margin: 6px 0;
+      }
+
+      progress {
+        width: 100%;
+        height: 6px;
+      }
+
+      #output,
+      #paths {
         margin: 0;
         padding: 8px;
-        max-height: 260px;
+        max-height: 300px;
         overflow: auto;
         white-space: pre-wrap;
         font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -123,36 +317,118 @@
         border-radius: 6px;
       }
 
+      #paths .new {
+        color: var(--figma-color-text);
+      }
+
+      #paths .existing {
+        color: var(--figma-color-text-tertiary);
+      }
+
       .error {
         color: var(--figma-color-text-danger);
+      }
+
+      details.advanced > summary {
+        padding: 5px 0;
+        color: var(--figma-color-text-secondary);
+        cursor: pointer;
       }
     </style>
   </head>
   <body>
     <h1>VarCat</h1>
-    <p class="lede">Create Aviala Design Figma Variables from the closed paradigm vocabulary.</p>
+    <p class="lede">
+      Creates Spiral-named Figma Variables as <strong>empty shells</strong>: pick templates, tick the
+      axes, then Apply writes paths and types only — every value stays yours to fill.
+    </p>
+    <p class="hint">
+      Not ColorCat. ColorCat generates color ramps; VarCat owns naming and bulk creation. This plugin
+      must be built before it loads — run <code>npm run build</code> if the window is blank.
+    </p>
 
-    <fieldset>
-      <legend>Namespaces</legend>
-      <ul class="namespaces" id="namespaces"></ul>
-      <label style="display: flex; gap: 6px; margin-top: 8px; align-items: center">
-        <input type="checkbox" id="allEffects" />
-        Expand every legal effect path (default: enabled whitelist only)
-      </label>
-    </fieldset>
+    <ol class="steps" id="stepBar">
+      <li data-step="1">1 · Templates</li>
+      <li data-step="2">2 · Axes</li>
+      <li data-step="3">3 · Dry-run</li>
+      <li data-step="4">4 · Apply</li>
+    </ol>
 
-    <fieldset>
-      <legend>Palette seeds</legend>
-      <div class="seeds" id="seeds"></div>
-    </fieldset>
+    <section class="step" id="step1">
+      <div class="searchRow">
+        <input type="search" id="search" placeholder="Filter templates (button, tab, palette…)" />
+        <button id="clearAll" style="flex: none">Clear all</button>
+      </div>
+      <div id="templateGroups"></div>
+      <div class="actions">
+        <button id="toAxes" class="primary" disabled>Configure axes →</button>
+      </div>
+    </section>
 
-    <div class="actions">
-      <button id="dryRun">Dry-run</button>
-      <button id="validate">Validate selection</button>
-      <button id="apply" class="primary">Apply</button>
-    </div>
+    <section class="step" id="step2">
+      <div id="axisPanels"></div>
+      <div class="banner hidden" id="axisWarning"></div>
+      <div class="actions">
+        <button id="backTo1">← Templates</button>
+        <button id="toDryRun" class="primary">Dry-run →</button>
+      </div>
+    </section>
 
-    <pre id="output">Ready.</pre>
+    <section class="step" id="step3">
+      <div class="banner hidden" id="modeBanner"></div>
+      <div class="searchRow">
+        <input type="search" id="pathFilter" placeholder="Filter paths" />
+        <button id="copyPaths" style="flex: none">Copy</button>
+      </div>
+      <pre id="paths">Run a dry-run.</pre>
+      <div class="actions">
+        <button id="backTo2">← Axes</button>
+        <button id="apply" class="primary" disabled>Apply empty shells</button>
+      </div>
+    </section>
+
+    <section class="step" id="step4">
+      <progress id="progress" value="0" max="1"></progress>
+      <p class="hint" id="progressText">Idle.</p>
+      <div class="actions">
+        <button id="backTo3">← Dry-run</button>
+        <button id="copyUnfilled" style="flex: none">Copy unfilled list</button>
+      </div>
+    </section>
+
+    <label class="toggle">
+      <input type="checkbox" id="hiddenFromPublishing" checked />
+      Keep unfilled shells out of the published team library
+    </label>
+
+    <pre id="output">Ready. Nothing is selected — that is the default.</pre>
+
+    <details class="advanced">
+      <summary>Advanced: complete paradigm (with preset values)</summary>
+      <p class="hint">
+        The original one-shot generator. It writes real values for all eight collections, and it is
+        still the only way to seed the palette ramps. Not needed for the template flow.
+      </p>
+      <fieldset>
+        <legend>Namespaces</legend>
+        <ul class="rows" id="namespaces"></ul>
+        <label class="toggle">
+          <input type="checkbox" id="allEffects" />
+          Expand every legal effect path (default: enabled whitelist only)
+        </label>
+      </fieldset>
+      <fieldset>
+        <legend>Palette seeds</legend>
+        <div class="seeds" id="seeds"></div>
+      </fieldset>
+      <div class="actions">
+        <button id="fullDryRun">Dry-run full paradigm</button>
+        <button id="fullApply">Generate complete paradigm (with preset values)</button>
+      </div>
+      <div class="actions">
+        <button id="validateFile">Check the whole file</button>
+      </div>
+    </details>
 
     <script src="ui.js"></script>
   </body>

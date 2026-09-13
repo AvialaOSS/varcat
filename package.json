@@ -2,7 +2,7 @@
   "name": "varcat",
   "version": "0.1.0",
   "private": true,
-  "description": "Figma plugin that creates Aviala Design Variables from a closed naming paradigm",
+  "description": "Figma plugin that creates Spiral-named Figma Variables as empty shells from a closed naming paradigm",
   "type": "module",
   "license": "MIT",
   "scripts": {
@@ -12,7 +12,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "dry-run": "node ./scripts/dry-run.mjs",
-    "paradigm:generate": "node ./scripts/generate-paradigm.mjs"
+    "paradigm:generate": "node ./scripts/generate-paradigm.mjs",
+    "spiral:catalog": "node ./scripts/sync-spiral-catalog.mjs",
+    "spiral:catalog:check": "node ./scripts/sync-spiral-catalog.mjs --check"
   },
   "dependencies": {
     "@aviala-design/color": "^0.5.16"
