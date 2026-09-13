@@ -1,0 +1,68 @@
+{
+  "id": "spiral.numberInput",
+  "kind": "component",
+  "spiral": {
+    "displayName": "NumberInput",
+    "group": "Information Collect",
+    "source": "packages/ui/src/components/number-input.tsx",
+    "variantProp": "style",
+    "appearanceVia": "type:NumberInputStyle"
+  },
+  "collection": "component",
+  "modes": [
+    "light",
+    "dark"
+  ],
+  "group": "numberInput",
+  "shape": "{variant}-{role}-{state}",
+  "valueType": "COLOR",
+  "axes": [
+    {
+      "slot": "variant",
+      "label": "Appearance",
+      "labelZh": "外观",
+      "note": "Spiral NumberInput «style» (type:NumberInputStyle), verbatim.",
+      "values": [
+        "default",
+        "monospaced"
+      ],
+      "default": [
+        "default",
+        "monospaced"
+      ]
+    },
+    {
+      "slot": "role",
+      "label": "Part",
+      "labelZh": "部位",
+      "values": [
+        "background",
+        "foreground",
+        "border",
+        "icon"
+      ],
+      "default": [
+        "background",
+        "foreground"
+      ]
+    },
+    {
+      "slot": "state",
+      "label": "State",
+      "labelZh": "状态",
+      "values": [
+        "rest",
+        "hover",
+        "active",
+        "disabled"
+      ],
+      "default": [
+        "rest",
+        "hover"
+      ]
+    }
+  ],
+  "exclude": [],
+  "extras": [],
+  "note": "Axes generated from Spiral source. Hand-curate for richer roles / exclude / extras."
+}

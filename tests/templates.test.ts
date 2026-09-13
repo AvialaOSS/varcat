@@ -19,6 +19,10 @@ import { getNamespace } from '../src/paradigm/vocabulary';
 
 const componentTemplates = templates.filter(isComponentTemplate);
 const curated = componentTemplates.filter((template) => !template.stub);
+const handCuratedIds = templateRegistry.templates
+  .filter((row) => row.kind === 'component')
+  .map((row) => row.id);
+const handCurated = handCuratedIds.map((id) => getTemplate(id) as ComponentTemplate);
 
 const allAxes = (template: ComponentTemplate) =>
   template.axes.reduce<Record<string, string[]>>((acc, axis) => {
@@ -46,7 +50,7 @@ describe('registry', () => {
   it('covers the seven paradigm layers plus every catalog component', () => {
     expect(templates.filter((template) => template.kind === 'layer')).toHaveLength(7);
     expect(componentTemplates).toHaveLength(spiralCatalog.componentCount);
-    expect(curated.map((template) => template.id).sort()).toEqual([
+    expect(handCurated.map((template) => template.id).sort()).toEqual([
       'spiral.alert',
       'spiral.badge',
       'spiral.button',
@@ -56,6 +60,8 @@ describe('registry', () => {
       'spiral.tab',
       'spiral.tag'
     ]);
+    expect(handCurated.every((template) => !template.stub)).toBe(true);
+    expect(curated.length).toBeGreaterThan(handCurated.length);
   });
 });
 
@@ -296,12 +302,36 @@ describe('validateTemplatePath', () => {
   });
 });
 
+describe('spiral-derived axes', () => {
+  it('takes Link appearance from Spiral LinkMode', () => {
+    const link = getTemplate('spiral.link') as ComponentTemplate;
+    expect(link.stub).toBe(false);
+    expect(link.spiral.variantProp).toBe('mode');
+    expect(link.axes.find((axis) => axis.slot === 'variant')?.values).toEqual([
+      'noBackground',
+      'noBackgroundCustom'
+    ]);
+    expect(expandCombos(link).paths[0]).toBe('link/noBackground-background-rest');
+  });
+
+  it('records appearance maps on the catalog for Spiral-sourced components', () => {
+    expect(spiralCatalog.appearanceCount).toBeGreaterThanOrEqual(17);
+    const button = spiralCatalog.components.find((entry) => entry.slug === 'button');
+    expect(button?.appearance?.prop).toBe('mode');
+    expect(button?.appearance?.values).toContain('destructive');
+  });
+});
+
 describe('stub templates', () => {
-  it('use generic parts and states, never an invented appearance word', () => {
-    const stub = componentTemplates.find((template) => template.stub)!;
-    expect(stub.axes.map((axis) => axis.slot)).toEqual(['role', 'state']);
-    expect(stub.spiral.variantProp).toBeNull();
-    expect(countSelection({ id: stub.id })).toBe(4);
+  it('remain only for components with no Spiral appearance prop', () => {
+    const stubs = componentTemplates.filter((template) => template.stub);
+    expect(stubs.length).toBe(spiralCatalog.stubCount);
+    expect(stubs.length).toBeLessThan(36);
+    for (const stub of stubs) {
+      expect(stub.axes.map((axis) => axis.slot)).toEqual(['role', 'state']);
+      expect(stub.spiral.variantProp).toBeNull();
+    }
+    expect(countSelection({ id: stubs[0].id })).toBe(4);
   });
 });
 
@@ -323,9 +353,9 @@ describe('counting', () => {
 });
 
 describe('expansion snapshot', () => {
-  it('locks the curated templates at full axes', () => {
+  it('locks the hand-curated templates at full axes', () => {
     const plan = expandTemplatePlan(
-      curated.map((template) => ({
+      handCurated.map((template) => ({
         id: template.id,
         axes: allAxes(template),
         includeExtras: true

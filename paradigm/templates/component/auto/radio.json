@@ -1,0 +1,68 @@
+{
+  "id": "spiral.radio",
+  "kind": "component",
+  "spiral": {
+    "displayName": "Radio",
+    "group": "Information Collect",
+    "source": "packages/ui/src/components/radio-group.tsx",
+    "variantProp": "variant",
+    "appearanceVia": "type:RadioInputVariant"
+  },
+  "collection": "component",
+  "modes": [
+    "light",
+    "dark"
+  ],
+  "group": "radio",
+  "shape": "{variant}-{role}-{state}",
+  "valueType": "COLOR",
+  "axes": [
+    {
+      "slot": "variant",
+      "label": "Appearance",
+      "labelZh": "外观",
+      "note": "Spiral Radio «variant» (type:RadioInputVariant), verbatim.",
+      "values": [
+        "normal",
+        "card"
+      ],
+      "default": [
+        "normal",
+        "card"
+      ]
+    },
+    {
+      "slot": "role",
+      "label": "Part",
+      "labelZh": "部位",
+      "values": [
+        "background",
+        "foreground",
+        "border",
+        "icon"
+      ],
+      "default": [
+        "background",
+        "foreground"
+      ]
+    },
+    {
+      "slot": "state",
+      "label": "State",
+      "labelZh": "状态",
+      "values": [
+        "rest",
+        "hover",
+        "active",
+        "disabled"
+      ],
+      "default": [
+        "rest",
+        "hover"
+      ]
+    }
+  ],
+  "exclude": [],
+  "extras": [],
+  "note": "Axes generated from Spiral source. Hand-curate for richer roles / exclude / extras."
+}

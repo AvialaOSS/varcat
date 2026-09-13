@@ -1,0 +1,828 @@
+{
+  "generatedBy": "scripts/sync-spiral-catalog.mjs",
+  "spiralCommit": "5f11055e27d54db34d57e828e084547671975bd1",
+  "note": "Spiral-derived appearance axes. Curated files in component/*.json override these.",
+  "templates": {
+    "spiral.link": {
+      "id": "spiral.link",
+      "kind": "component",
+      "spiral": {
+        "displayName": "Link",
+        "group": "Basic Input",
+        "source": "packages/ui/src/components/link.tsx",
+        "variantProp": "mode",
+        "appearanceVia": "type:LinkMode"
+      },
+      "collection": "component",
+      "modes": [
+        "light",
+        "dark"
+      ],
+      "group": "link",
+      "shape": "{variant}-{role}-{state}",
+      "valueType": "COLOR",
+      "axes": [
+        {
+          "slot": "variant",
+          "label": "Appearance",
+          "labelZh": "外观",
+          "note": "Spiral Link «mode» (type:LinkMode), verbatim.",
+          "values": [
+            "noBackground",
+            "noBackgroundCustom"
+          ],
+          "default": [
+            "noBackground",
+            "noBackgroundCustom"
+          ]
+        },
+        {
+          "slot": "role",
+          "label": "Part",
+          "labelZh": "部位",
+          "values": [
+            "background",
+            "foreground",
+            "border",
+            "icon"
+          ],
+          "default": [
+            "background",
+            "foreground"
+          ]
+        },
+        {
+          "slot": "state",
+          "label": "State",
+          "labelZh": "状态",
+          "values": [
+            "rest",
+            "hover",
+            "active",
+            "disabled"
+          ],
+          "default": [
+            "rest",
+            "hover"
+          ]
+        }
+      ],
+      "exclude": [],
+      "extras": [],
+      "note": "Axes generated from Spiral source. Hand-curate for richer roles / exclude / extras."
+    },
+    "spiral.datePicker": {
+      "id": "spiral.datePicker",
+      "kind": "component",
+      "spiral": {
+        "displayName": "DatePicker",
+        "group": "Information Collect",
+        "source": "packages/ui/src/components/date-picker/date-picker.tsx",
+        "variantProp": "mode",
+        "appearanceVia": "type:DatePickerMode"
+      },
+      "collection": "component",
+      "modes": [
+        "light",
+        "dark"
+      ],
+      "group": "datePicker",
+      "shape": "{variant}-{role}-{state}",
+      "valueType": "COLOR",
+      "axes": [
+        {
+          "slot": "variant",
+          "label": "Appearance",
+          "labelZh": "外观",
+          "note": "Spiral DatePicker «mode» (type:DatePickerMode), verbatim.",
+          "values": [
+            "single",
+            "range"
+          ],
+          "default": [
+            "single",
+            "range"
+          ]
+        },
+        {
+          "slot": "role",
+          "label": "Part",
+          "labelZh": "部位",
+          "values": [
+            "background",
+            "foreground",
+            "border",
+            "icon"
+          ],
+          "default": [
+            "background",
+            "foreground"
+          ]
+        },
+        {
+          "slot": "state",
+          "label": "State",
+          "labelZh": "状态",
+          "values": [
+            "rest",
+            "hover",
+            "active",
+            "disabled"
+          ],
+          "default": [
+            "rest",
+            "hover"
+          ]
+        }
+      ],
+      "exclude": [],
+      "extras": [],
+      "note": "Axes generated from Spiral source. Hand-curate for richer roles / exclude / extras."
+    },
+    "spiral.numberInput": {
+      "id": "spiral.numberInput",
+      "kind": "component",
+      "spiral": {
+        "displayName": "NumberInput",
+        "group": "Information Collect",
+        "source": "packages/ui/src/components/number-input.tsx",
+        "variantProp": "style",
+        "appearanceVia": "type:NumberInputStyle"
+      },
+      "collection": "component",
+      "modes": [
+        "light",
+        "dark"
+      ],
+      "group": "numberInput",
+      "shape": "{variant}-{role}-{state}",
+      "valueType": "COLOR",
+      "axes": [
+        {
+          "slot": "variant",
+          "label": "Appearance",
+          "labelZh": "外观",
+          "note": "Spiral NumberInput «style» (type:NumberInputStyle), verbatim.",
+          "values": [
+            "default",
+            "monospaced"
+          ],
+          "default": [
+            "default",
+            "monospaced"
+          ]
+        },
+        {
+          "slot": "role",
+          "label": "Part",
+          "labelZh": "部位",
+          "values": [
+            "background",
+            "foreground",
+            "border",
+            "icon"
+          ],
+          "default": [
+            "background",
+            "foreground"
+          ]
+        },
+        {
+          "slot": "state",
+          "label": "State",
+          "labelZh": "状态",
+          "values": [
+            "rest",
+            "hover",
+            "active",
+            "disabled"
+          ],
+          "default": [
+            "rest",
+            "hover"
+          ]
+        }
+      ],
+      "exclude": [],
+      "extras": [],
+      "note": "Axes generated from Spiral source. Hand-curate for richer roles / exclude / extras."
+    },
+    "spiral.radio": {
+      "id": "spiral.radio",
+      "kind": "component",
+      "spiral": {
+        "displayName": "Radio",
+        "group": "Information Collect",
+        "source": "packages/ui/src/components/radio-group.tsx",
+        "variantProp": "variant",
+        "appearanceVia": "type:RadioInputVariant"
+      },
+      "collection": "component",
+      "modes": [
+        "light",
+        "dark"
+      ],
+      "group": "radio",
+      "shape": "{variant}-{role}-{state}",
+      "valueType": "COLOR",
+      "axes": [
+        {
+          "slot": "variant",
+          "label": "Appearance",
+          "labelZh": "外观",
+          "note": "Spiral Radio «variant» (type:RadioInputVariant), verbatim.",
+          "values": [
+            "normal",
+            "card"
+          ],
+          "default": [
+            "normal",
+            "card"
+          ]
+        },
+        {
+          "slot": "role",
+          "label": "Part",
+          "labelZh": "部位",
+          "values": [
+            "background",
+            "foreground",
+            "border",
+            "icon"
+          ],
+          "default": [
+            "background",
+            "foreground"
+          ]
+        },
+        {
+          "slot": "state",
+          "label": "State",
+          "labelZh": "状态",
+          "values": [
+            "rest",
+            "hover",
+            "active",
+            "disabled"
+          ],
+          "default": [
+            "rest",
+            "hover"
+          ]
+        }
+      ],
+      "exclude": [],
+      "extras": [],
+      "note": "Axes generated from Spiral source. Hand-curate for richer roles / exclude / extras."
+    },
+    "spiral.slider": {
+      "id": "spiral.slider",
+      "kind": "component",
+      "spiral": {
+        "displayName": "Slider",
+        "group": "Information Collect",
+        "source": "packages/ui/src/components/slider.tsx",
+        "variantProp": "type",
+        "appearanceVia": "type:SliderType"
+      },
+      "collection": "component",
+      "modes": [
+        "light",
+        "dark"
+      ],
+      "group": "slider",
+      "shape": "{variant}-{role}-{state}",
+      "valueType": "COLOR",
+      "axes": [
+        {
+          "slot": "variant",
+          "label": "Appearance",
+          "labelZh": "外观",
+          "note": "Spiral Slider «type» (type:SliderType), verbatim.",
+          "values": [
+            "default",
+            "range"
+          ],
+          "default": [
+            "default",
+            "range"
+          ]
+        },
+        {
+          "slot": "role",
+          "label": "Part",
+          "labelZh": "部位",
+          "values": [
+            "background",
+            "foreground",
+            "border",
+            "icon"
+          ],
+          "default": [
+            "background",
+            "foreground"
+          ]
+        },
+        {
+          "slot": "state",
+          "label": "State",
+          "labelZh": "状态",
+          "values": [
+            "rest",
+            "hover",
+            "active",
+            "disabled"
+          ],
+          "default": [
+            "rest",
+            "hover"
+          ]
+        }
+      ],
+      "exclude": [],
+      "extras": [],
+      "note": "Axes generated from Spiral source. Hand-curate for richer roles / exclude / extras."
+    },
+    "spiral.upload": {
+      "id": "spiral.upload",
+      "kind": "component",
+      "spiral": {
+        "displayName": "Upload",
+        "group": "Information Collect",
+        "source": "packages/ui/src/components/upload.tsx",
+        "variantProp": "style",
+        "appearanceVia": "type:UploadStyle"
+      },
+      "collection": "component",
+      "modes": [
+        "light",
+        "dark"
+      ],
+      "group": "upload",
+      "shape": "{variant}-{role}-{state}",
+      "valueType": "COLOR",
+      "axes": [
+        {
+          "slot": "variant",
+          "label": "Appearance",
+          "labelZh": "外观",
+          "note": "Spiral Upload «style» (type:UploadStyle), verbatim.",
+          "values": [
+            "default",
+            "large"
+          ],
+          "default": [
+            "default",
+            "large"
+          ]
+        },
+        {
+          "slot": "role",
+          "label": "Part",
+          "labelZh": "部位",
+          "values": [
+            "background",
+            "foreground",
+            "border",
+            "icon"
+          ],
+          "default": [
+            "background",
+            "foreground"
+          ]
+        },
+        {
+          "slot": "state",
+          "label": "State",
+          "labelZh": "状态",
+          "values": [
+            "rest",
+            "hover",
+            "active",
+            "disabled"
+          ],
+          "default": [
+            "rest",
+            "hover"
+          ]
+        }
+      ],
+      "exclude": [],
+      "extras": [],
+      "note": "Axes generated from Spiral source. Hand-curate for richer roles / exclude / extras."
+    },
+    "spiral.video": {
+      "id": "spiral.video",
+      "kind": "component",
+      "spiral": {
+        "displayName": "Video",
+        "group": "Information Display",
+        "source": "packages/ui/src/components/video/video.tsx",
+        "variantProp": "appearance",
+        "appearanceVia": "type:VideoAppearance"
+      },
+      "collection": "component",
+      "modes": [
+        "light",
+        "dark"
+      ],
+      "group": "video",
+      "shape": "{variant}-{role}-{state}",
+      "valueType": "COLOR",
+      "axes": [
+        {
+          "slot": "variant",
+          "label": "Appearance",
+          "labelZh": "外观",
+          "note": "Spiral Video «appearance» (type:VideoAppearance), verbatim.",
+          "values": [
+            "default",
+            "light"
+          ],
+          "default": [
+            "default",
+            "light"
+          ]
+        },
+        {
+          "slot": "role",
+          "label": "Part",
+          "labelZh": "部位",
+          "values": [
+            "background",
+            "foreground",
+            "border",
+            "icon"
+          ],
+          "default": [
+            "background",
+            "foreground"
+          ]
+        },
+        {
+          "slot": "state",
+          "label": "State",
+          "labelZh": "状态",
+          "values": [
+            "rest",
+            "hover",
+            "active",
+            "disabled"
+          ],
+          "default": [
+            "rest",
+            "hover"
+          ]
+        }
+      ],
+      "exclude": [],
+      "extras": [],
+      "note": "Axes generated from Spiral source. Hand-curate for richer roles / exclude / extras."
+    },
+    "spiral.feedback": {
+      "id": "spiral.feedback",
+      "kind": "component",
+      "spiral": {
+        "displayName": "Feedback",
+        "group": "Response And Feedback",
+        "source": "packages/ui/src/components/feedback.tsx",
+        "variantProp": "type",
+        "appearanceVia": "type:FeedbackType"
+      },
+      "collection": "component",
+      "modes": [
+        "light",
+        "dark"
+      ],
+      "group": "feedback",
+      "shape": "{variant}-{role}-{state}",
+      "valueType": "COLOR",
+      "axes": [
+        {
+          "slot": "variant",
+          "label": "Appearance",
+          "labelZh": "外观",
+          "note": "Spiral Feedback «type» (type:FeedbackType), verbatim.",
+          "values": [
+            "information",
+            "warning",
+            "wrong",
+            "success",
+            "normal"
+          ],
+          "default": [
+            "information",
+            "warning"
+          ]
+        },
+        {
+          "slot": "role",
+          "label": "Part",
+          "labelZh": "部位",
+          "values": [
+            "background",
+            "foreground",
+            "border",
+            "icon"
+          ],
+          "default": [
+            "background",
+            "foreground"
+          ]
+        },
+        {
+          "slot": "state",
+          "label": "State",
+          "labelZh": "状态",
+          "values": [
+            "rest",
+            "hover",
+            "active",
+            "disabled"
+          ],
+          "default": [
+            "rest",
+            "hover"
+          ]
+        }
+      ],
+      "exclude": [],
+      "extras": [],
+      "note": "Axes generated from Spiral source. Hand-curate for richer roles / exclude / extras."
+    },
+    "spiral.progress": {
+      "id": "spiral.progress",
+      "kind": "component",
+      "spiral": {
+        "displayName": "Progress",
+        "group": "Response And Feedback",
+        "source": "packages/ui/src/components/progress.tsx",
+        "variantProp": "type",
+        "appearanceVia": "type:ProgressType"
+      },
+      "collection": "component",
+      "modes": [
+        "light",
+        "dark"
+      ],
+      "group": "progress",
+      "shape": "{variant}-{role}-{state}",
+      "valueType": "COLOR",
+      "axes": [
+        {
+          "slot": "variant",
+          "label": "Appearance",
+          "labelZh": "外观",
+          "note": "Spiral Progress «type» (type:ProgressType), verbatim.",
+          "values": [
+            "default",
+            "success",
+            "fail"
+          ],
+          "default": [
+            "default",
+            "success"
+          ]
+        },
+        {
+          "slot": "role",
+          "label": "Part",
+          "labelZh": "部位",
+          "values": [
+            "background",
+            "foreground",
+            "border",
+            "icon"
+          ],
+          "default": [
+            "background",
+            "foreground"
+          ]
+        },
+        {
+          "slot": "state",
+          "label": "State",
+          "labelZh": "状态",
+          "values": [
+            "rest",
+            "hover",
+            "active",
+            "disabled"
+          ],
+          "default": [
+            "rest",
+            "hover"
+          ]
+        }
+      ],
+      "exclude": [],
+      "extras": [],
+      "note": "Axes generated from Spiral source. Hand-curate for richer roles / exclude / extras."
+    },
+    "spiral.navigation": {
+      "id": "spiral.navigation",
+      "kind": "component",
+      "spiral": {
+        "displayName": "Navigation",
+        "group": "Structure Navigation",
+        "source": "packages/ui/src/components/navigation.tsx",
+        "variantProp": "background",
+        "appearanceVia": "type:NavigationBackground"
+      },
+      "collection": "component",
+      "modes": [
+        "light",
+        "dark"
+      ],
+      "group": "navigation",
+      "shape": "{variant}-{role}-{state}",
+      "valueType": "COLOR",
+      "axes": [
+        {
+          "slot": "variant",
+          "label": "Appearance",
+          "labelZh": "外观",
+          "note": "Spiral Navigation «background» (type:NavigationBackground), verbatim.",
+          "values": [
+            "none",
+            "default"
+          ],
+          "default": [
+            "none",
+            "default"
+          ]
+        },
+        {
+          "slot": "role",
+          "label": "Part",
+          "labelZh": "部位",
+          "values": [
+            "background",
+            "foreground",
+            "border",
+            "icon"
+          ],
+          "default": [
+            "background",
+            "foreground"
+          ]
+        },
+        {
+          "slot": "state",
+          "label": "State",
+          "labelZh": "状态",
+          "values": [
+            "rest",
+            "hover",
+            "active",
+            "disabled"
+          ],
+          "default": [
+            "rest",
+            "hover"
+          ]
+        }
+      ],
+      "exclude": [],
+      "extras": [],
+      "note": "Axes generated from Spiral source. Hand-curate for richer roles / exclude / extras."
+    },
+    "spiral.popover": {
+      "id": "spiral.popover",
+      "kind": "component",
+      "spiral": {
+        "displayName": "Popover",
+        "group": "System Composition",
+        "source": "packages/ui/src/components/popover.tsx",
+        "variantProp": "appearance",
+        "appearanceVia": "type:PopoverAppearance"
+      },
+      "collection": "component",
+      "modes": [
+        "light",
+        "dark"
+      ],
+      "group": "popover",
+      "shape": "{variant}-{role}-{state}",
+      "valueType": "COLOR",
+      "axes": [
+        {
+          "slot": "variant",
+          "label": "Appearance",
+          "labelZh": "外观",
+          "note": "Spiral Popover «appearance» (type:PopoverAppearance), verbatim.",
+          "values": [
+            "default",
+            "tooltip",
+            "primary"
+          ],
+          "default": [
+            "default",
+            "tooltip"
+          ]
+        },
+        {
+          "slot": "role",
+          "label": "Part",
+          "labelZh": "部位",
+          "values": [
+            "background",
+            "foreground",
+            "border",
+            "icon"
+          ],
+          "default": [
+            "background",
+            "foreground"
+          ]
+        },
+        {
+          "slot": "state",
+          "label": "State",
+          "labelZh": "状态",
+          "values": [
+            "rest",
+            "hover",
+            "active",
+            "disabled"
+          ],
+          "default": [
+            "rest",
+            "hover"
+          ]
+        }
+      ],
+      "exclude": [],
+      "extras": [],
+      "note": "Axes generated from Spiral source. Hand-curate for richer roles / exclude / extras."
+    },
+    "spiral.typography": {
+      "id": "spiral.typography",
+      "kind": "component",
+      "spiral": {
+        "displayName": "Typography",
+        "group": "System Composition",
+        "source": "packages/ui/src/components/typography.tsx",
+        "variantProp": "tone",
+        "appearanceVia": "type:TypographyTone"
+      },
+      "collection": "component",
+      "modes": [
+        "light",
+        "dark"
+      ],
+      "group": "typography",
+      "shape": "{variant}-{role}-{state}",
+      "valueType": "COLOR",
+      "axes": [
+        {
+          "slot": "variant",
+          "label": "Appearance",
+          "labelZh": "外观",
+          "note": "Spiral Typography «tone» (type:TypographyTone), verbatim.",
+          "values": [
+            "default",
+            "white"
+          ],
+          "default": [
+            "default",
+            "white"
+          ]
+        },
+        {
+          "slot": "role",
+          "label": "Part",
+          "labelZh": "部位",
+          "values": [
+            "background",
+            "foreground",
+            "border",
+            "icon"
+          ],
+          "default": [
+            "background",
+            "foreground"
+          ]
+        },
+        {
+          "slot": "state",
+          "label": "State",
+          "labelZh": "状态",
+          "values": [
+            "rest",
+            "hover",
+            "active",
+            "disabled"
+          ],
+          "default": [
+            "rest",
+            "hover"
+          ]
+        }
+      ],
+      "exclude": [],
+      "extras": [],
+      "note": "Axes generated from Spiral source. Hand-curate for richer roles / exclude / extras."
+    }
+  }
+}

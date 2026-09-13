@@ -6,12 +6,14 @@
  * Pure, like the rest of `src/paradigm`: no Figma API and no IO, so the UI, the
  * dry-run CLI and vitest all read the same expansion.
  *
- * Adding a component template means adding the JSON file, registering it in
- * `paradigm/templates/index.json` and adding the static import below — esbuild
- * bundles the JSON, so a glob is not an option.
+ * Adding a hand-curated component template: JSON under paradigm/templates/component/,
+ * register in paradigm/templates/index.json, and add the static import below.
+ * Spiral-derived axes for the rest come from `npm run spiral:catalog` →
+ * paradigm/templates/from-spiral.json (esbuild cannot glob).
  */
 import registryJson from '../../paradigm/templates/index.json';
 import spiralCatalogJson from '../../paradigm/spiral-catalog.json';
+import fromSpiralJson from '../../paradigm/templates/from-spiral.json';
 import layerPalette from '../../paradigm/templates/layer/palette.json';
 import layerSemantic from '../../paradigm/templates/layer/semantic.json';
 import layerScaleStatic from '../../paradigm/templates/layer/scale-static.json';
@@ -100,9 +102,18 @@ export type TemplateSelection = {
   includeExtras?: boolean;
 };
 
+export type SpiralAppearance = {
+  prop: string;
+  values: string[];
+  via: string;
+};
+
 export type SpiralCatalog = {
   source: string;
   componentCount: number;
+  appearanceCount?: number;
+  stubCount?: number;
+  spiralCommit?: string | null;
   groups: Array<{ name: string; components: string[] }>;
   components: Array<{
     displayName: string;
@@ -111,6 +122,9 @@ export type SpiralCatalog = {
     source: string;
     cssPropertyCount: number;
     cssProperties: string[];
+    cvaKeys?: string[];
+    appearance?: SpiralAppearance | null;
+    curated?: boolean;
   }>;
 };
 
@@ -144,10 +158,11 @@ const COMPONENT_DATA: Record<string, any> = {
   'spiral.alert': componentAlert
 };
 
+const FROM_SPIRAL = (fromSpiralJson as { templates: Record<string, any> }).templates;
+
 /**
- * Generic axes for a catalog component that has no curated template yet. The
- * words are the four parts and four states every Spiral component shares, so a
- * stub never invents an appearance word Spiral does not use.
+ * Generic axes for a catalog component that has no Spiral appearance prop and no
+ * curated template. Shared part × state words only — never invent appearance.
  */
 const STUB_AXES: TemplateAxis[] = [
   {
@@ -219,7 +234,7 @@ const stubTemplate = (entry: SpiralCatalog['components'][number]): ComponentTemp
   axes: STUB_AXES,
   exclude: [],
   extras: [],
-  note: '占位轴来自 Spiral 目录。该组件尚未整理外观轴。',
+  note: '占位轴：Spiral 源码未声明外观轴（mode/type/style/…）。',
   stub: true
 });
 
@@ -229,12 +244,21 @@ const CURATED: Template[] = templateRegistry.templates.map((row) =>
 
 const CURATED_IDS = new Set(CURATED.map((template) => template.id));
 
+const FROM_SPIRAL_TEMPLATES: ComponentTemplate[] = Object.entries(FROM_SPIRAL)
+  .filter(([id]) => !CURATED_IDS.has(id))
+  .map(([, data]) => componentTemplate(data));
+
+const FROM_SPIRAL_IDS = new Set(FROM_SPIRAL_TEMPLATES.map((template) => template.id));
+
 const STUBS: ComponentTemplate[] = spiralCatalog.components
-  .filter((entry) => !CURATED_IDS.has(`spiral.${entry.slug}`))
+  .filter((entry) => {
+    const id = `spiral.${entry.slug}`;
+    return !CURATED_IDS.has(id) && !FROM_SPIRAL_IDS.has(id);
+  })
   .map(stubTemplate);
 
-/** Every selectable template: seven layers, the curated components, then the catalog stubs. */
-export const templates: Template[] = [...CURATED, ...STUBS];
+/** Layers + curated + Spiral-derived axes + remaining stubs. */
+export const templates: Template[] = [...CURATED, ...FROM_SPIRAL_TEMPLATES, ...STUBS];
 
 const BY_ID = new Map(templates.map((template) => [template.id, template]));
 

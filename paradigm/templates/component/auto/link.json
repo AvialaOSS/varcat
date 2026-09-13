@@ -1,0 +1,68 @@
+{
+  "id": "spiral.link",
+  "kind": "component",
+  "spiral": {
+    "displayName": "Link",
+    "group": "Basic Input",
+    "source": "packages/ui/src/components/link.tsx",
+    "variantProp": "mode",
+    "appearanceVia": "type:LinkMode"
+  },
+  "collection": "component",
+  "modes": [
+    "light",
+    "dark"
+  ],
+  "group": "link",
+  "shape": "{variant}-{role}-{state}",
+  "valueType": "COLOR",
+  "axes": [
+    {
+      "slot": "variant",
+      "label": "Appearance",
+      "labelZh": "外观",
+      "note": "Spiral Link «mode» (type:LinkMode), verbatim.",
+      "values": [
+        "noBackground",
+        "noBackgroundCustom"
+      ],
+      "default": [
+        "noBackground",
+        "noBackgroundCustom"
+      ]
+    },
+    {
+      "slot": "role",
+      "label": "Part",
+      "labelZh": "部位",
+      "values": [
+        "background",
+        "foreground",
+        "border",
+        "icon"
+      ],
+      "default": [
+        "background",
+        "foreground"
+      ]
+    },
+    {
+      "slot": "state",
+      "label": "State",
+      "labelZh": "状态",
+      "values": [
+        "rest",
+        "hover",
+        "active",
+        "disabled"
+      ],
+      "default": [
+        "rest",
+        "hover"
+      ]
+    }
+  ],
+  "exclude": [],
+  "extras": [],
+  "note": "Axes generated from Spiral source. Hand-curate for richer roles / exclude / extras."
+}

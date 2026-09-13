@@ -1,0 +1,68 @@
+{
+  "id": "spiral.video",
+  "kind": "component",
+  "spiral": {
+    "displayName": "Video",
+    "group": "Information Display",
+    "source": "packages/ui/src/components/video/video.tsx",
+    "variantProp": "appearance",
+    "appearanceVia": "type:VideoAppearance"
+  },
+  "collection": "component",
+  "modes": [
+    "light",
+    "dark"
+  ],
+  "group": "video",
+  "shape": "{variant}-{role}-{state}",
+  "valueType": "COLOR",
+  "axes": [
+    {
+      "slot": "variant",
+      "label": "Appearance",
+      "labelZh": "外观",
+      "note": "Spiral Video «appearance» (type:VideoAppearance), verbatim.",
+      "values": [
+        "default",
+        "light"
+      ],
+      "default": [
+        "default",
+        "light"
+      ]
+    },
+    {
+      "slot": "role",
+      "label": "Part",
+      "labelZh": "部位",
+      "values": [
+        "background",
+        "foreground",
+        "border",
+        "icon"
+      ],
+      "default": [
+        "background",
+        "foreground"
+      ]
+    },
+    {
+      "slot": "state",
+      "label": "State",
+      "labelZh": "状态",
+      "values": [
+        "rest",
+        "hover",
+        "active",
+        "disabled"
+      ],
+      "default": [
+        "rest",
+        "hover"
+      ]
+    }
+  ],
+  "exclude": [],
+  "extras": [],
+  "note": "Axes generated from Spiral source. Hand-curate for richer roles / exclude / extras."
+}
