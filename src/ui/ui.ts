@@ -2,6 +2,9 @@
  * Four-step UI: pick templates → configure axes → dry-run the full path list →
  * Apply. Zero framework by design; the only state is `selected`, a map from
  * template id to the ticked axis values.
+ *
+ * User-facing copy is zh-CN; Spiral product chrome (brand, density, tokens)
+ * lives in ui.html.
  */
 type Axis = {
   slot: string;
@@ -22,6 +25,7 @@ type TemplateSummary = {
   modes: string[];
   shape: string;
   summary?: string;
+  summaryZh?: string;
   stub?: boolean;
   note?: string;
   variantProp?: string | null;
@@ -45,6 +49,21 @@ const write = (text: string, isError = false) => {
   output.textContent = text;
   output.classList.toggle('error', isError);
 };
+
+/** Spiral Storybook group names → concise zh-CN for the panel. */
+const GROUP_ZH: Record<string, string> = {
+  'Foundation layer': '基础层',
+  'Basic Input': '基础输入',
+  'Information Collect': '信息采集',
+  'Information Display': '信息展示',
+  'Response And Feedback': '响应与反馈',
+  'Structure Navigation': '结构导航',
+  'System Composition': '系统构成'
+};
+
+const groupLabel = (group: string) => GROUP_ZH[group] ?? group;
+
+const displayLabel = (template: TemplateSummary) => template.labelZh || template.label;
 
 let templates: TemplateSummary[] = [];
 let thresholds = { warn: 200, confirm: 500 };
@@ -106,15 +125,20 @@ const renderTemplates = () => {
 
   const groups = new Map<string, TemplateSummary[]>();
   for (const template of templates) {
-    if (
-      filter &&
-      !`${template.label} ${template.id} ${template.shape}`.toLowerCase().includes(filter)
-    ) {
-      continue;
-    }
+    const haystack =
+      `${displayLabel(template)} ${template.label} ${template.id} ${template.shape} ${groupLabel(template.group)}`.toLowerCase();
+    if (filter && !haystack.includes(filter)) continue;
     const bucket = groups.get(template.group) ?? [];
     bucket.push(template);
     groups.set(template.group, bucket);
+  }
+
+  if (groups.size === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.textContent = filter ? '没有匹配的模板。' : '暂无模板。';
+    host.append(empty);
+    return;
   }
 
   for (const [group, rows] of groups) {
@@ -124,10 +148,10 @@ const renderTemplates = () => {
 
     const summary = document.createElement('summary');
     const picked = rows.filter((row) => selected.has(row.id)).length;
-    summary.textContent = group;
+    summary.textContent = groupLabel(group);
     const count = document.createElement('span');
     count.className = 'count';
-    count.textContent = picked > 0 ? `${picked}/${rows.length} selected` : `${rows.length}`;
+    count.textContent = picked > 0 ? `${picked}/${rows.length} 已选` : `${rows.length}`;
     summary.append(count);
     details.append(summary);
 
@@ -149,7 +173,7 @@ const renderTemplates = () => {
 
       const label = document.createElement('label');
       label.htmlFor = checkbox.id;
-      label.textContent = template.label;
+      label.textContent = displayLabel(template);
 
       const shape = document.createElement('code');
       shape.textContent = template.shape;
@@ -159,7 +183,7 @@ const renderTemplates = () => {
       if (template.stub) {
         const badge = document.createElement('span');
         badge.className = 'stub';
-        badge.textContent = 'stub axes';
+        badge.textContent = '占位轴';
         badge.title = template.note ?? '';
         item.append(badge);
       }
@@ -168,8 +192,8 @@ const renderTemplates = () => {
       meta.className = 'meta';
       meta.textContent =
         template.kind === 'layer'
-          ? `${template.defaultCount} vars`
-          : `+${template.defaultCount} of ${template.maxCount}`;
+          ? `${template.defaultCount} 个变量`
+          : `默认 ${template.defaultCount} / 最多 ${template.maxCount}`;
       item.append(meta);
 
       list.append(item);
@@ -185,8 +209,8 @@ const refreshHeader = () => {
   $<HTMLButtonElement>('apply').disabled = selected.size === 0 || dryRunPaths.length === 0;
   write(
     selected.size === 0
-      ? 'Nothing is selected — that is the default. Apply is disabled.'
-      : `${selected.size} template(s) selected · ${total} variable(s) will be created as empty shells.`
+      ? '未选模板（默认）。应用已禁用。'
+      : `已选 ${selected.size} 个模板 · 将创建 ${total} 个空壳变量。`
   );
   setStep(step);
 };
@@ -197,6 +221,14 @@ const renderAxisPanels = () => {
   const host = $<HTMLDivElement>('axisPanels');
   host.innerHTML = '';
 
+  if (selected.size === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'empty';
+    empty.textContent = '请先在上一步选择模板。';
+    host.append(empty);
+    return;
+  }
+
   for (const id of selected.keys()) {
     const template = byId(id);
     const selection = selected.get(id)!;
@@ -205,7 +237,7 @@ const renderAxisPanels = () => {
     panel.className = 'axisPanel';
 
     const heading = document.createElement('h3');
-    heading.textContent = template.label;
+    heading.textContent = displayLabel(template);
     panel.append(heading);
 
     const shape = document.createElement('code');
@@ -215,7 +247,8 @@ const renderAxisPanels = () => {
     if (template.kind === 'layer') {
       const fixed = document.createElement('p');
       fixed.className = 'hint';
-      fixed.textContent = `${template.summary ?? ''} Fixed at ${template.defaultCount} paths — no axes to tick.`;
+      const summaryText = template.summaryZh || template.summary || '';
+      fixed.textContent = `${summaryText} 固定 ${template.defaultCount} 条路径 — 无需勾选轴。`;
       panel.append(fixed);
       host.append(panel);
       continue;
@@ -224,7 +257,7 @@ const renderAxisPanels = () => {
     if (template.variantProp) {
       const provenance = document.createElement('p');
       provenance.className = 'hint';
-      provenance.textContent = `Appearance axis comes from the Spiral "${template.variantProp}" prop.`;
+      provenance.textContent = `外观轴来自 Spiral「${template.variantProp}」属性。`;
       panel.append(provenance);
     }
     if (template.note) {
@@ -253,7 +286,7 @@ const renderAxisPanels = () => {
 
       const label = document.createElement('span');
       label.className = 'axisLabel';
-      label.textContent = axis.labelZh ? `${axis.label} · ${axis.labelZh}` : axis.label;
+      label.textContent = axis.labelZh || axis.label;
       if (axis.note) label.title = axis.note;
       block.append(label);
 
@@ -293,7 +326,7 @@ const renderAxisPanels = () => {
         retally();
         refreshHeader();
       });
-      extras.append(box, document.createTextNode(`Include ${template.extras} single-point tokens (FLOAT)`));
+      extras.append(box, document.createTextNode(`包含 ${template.extras} 个单点 token（FLOAT）`));
       panel.append(extras);
     }
 
@@ -311,13 +344,13 @@ const renderAxisPanels = () => {
       return element;
     };
     foot.append(
-      button('Select all', () => {
+      button('全选', () => {
         for (const axis of template.axes ?? []) selection.axes[axis.slot] = [...axis.values];
       }),
-      button('Clear', () => {
+      button('清空', () => {
         for (const axis of template.axes ?? []) selection.axes[axis.slot] = [];
       }),
-      button('Reset', () => {
+      button('重置', () => {
         selected.set(template.id, defaultSelection(template));
       }),
       tally
@@ -333,12 +366,12 @@ const refreshAxisWarning = () => {
   const total = totalCount();
   if (total > thresholds.confirm) {
     banner.className = 'banner danger';
-    banner.textContent = `${total} variables. Above ${thresholds.confirm} Apply asks for a second confirmation — a full cross product is rarely what you want.`;
+    banner.textContent = `${total} 个变量。超过 ${thresholds.confirm} 时应用会二次确认 — 全交叉积通常不是你要的。`;
     return;
   }
   if (total > thresholds.warn) {
     banner.className = 'banner warn';
-    banner.textContent = `${total} variables. Above ${thresholds.warn} the run gets slow and the list gets hard to review.`;
+    banner.textContent = `${total} 个变量。超过 ${thresholds.warn} 会变慢，列表也更难审阅。`;
     return;
   }
   banner.className = 'banner hidden';
@@ -359,13 +392,13 @@ const renderPaths = () => {
   }
   const lines: string[] = [];
   for (const [collection, bucket] of byCollection) {
-    lines.push(`# ${collection} (${bucket.length})`);
+    lines.push(`# ${collection}（${bucket.length}）`);
     for (const row of bucket) {
       lines.push(`  ${row.status === 'new' ? '+' : '·'} ${row.path}`);
     }
     lines.push('');
   }
-  pathsPane.textContent = lines.join('\n').trimEnd() || 'No path matches the filter.';
+  pathsPane.textContent = lines.join('\n').trimEnd() || '没有匹配的路径。';
 };
 
 const copy = (text: string) => {
@@ -442,18 +475,18 @@ const formatTemplatePlan = (payload: any) => {
   const created = payload.paths.filter((row: any) => row.status === 'new').length;
   const existing = payload.paths.length - created;
   const lines = [
-    `Dry-run: ${created} to create · ${existing} already there · ${payload.invalid.length} paradigm violation(s)`
+    `干跑：新建 ${created} · 已存在 ${existing} · 范式违规 ${payload.invalid.length}`
   ];
   for (const [id, count] of Object.entries(payload.counts)) {
     lines.push(`  ${id}: ${count}`);
   }
   if (payload.excluded.length) {
-    lines.push('', `Excluded by template rules: ${payload.excluded.length}`);
+    lines.push('', `模板规则排除：${payload.excluded.length}`);
     for (const row of payload.excluded.slice(0, 6)) lines.push(`  ${row.path} — ${row.why}`);
-    if (payload.excluded.length > 6) lines.push(`  … ${payload.excluded.length - 6} more`);
+    if (payload.excluded.length > 6) lines.push(`  … 另有 ${payload.excluded.length - 6} 条`);
   }
   if (payload.invalid.length) {
-    lines.push('', 'Violations (Apply is disabled until these are gone):');
+    lines.push('', '违规（清除前无法应用）：');
     for (const row of payload.invalid.slice(0, 10)) {
       lines.push(`  ${row.path} — ${row.issues.join('; ')}`);
     }
@@ -467,14 +500,14 @@ const renderModeBanner = (budget: Array<{ collection: string; needs: string[]; h
   const multi = budget.filter((row) => row.needs.length > 1);
   if (short.length > 0) {
     banner.className = 'banner danger';
-    banner.textContent = `Mode shortfall: ${short
-      .map((row) => `${row.collection} has ${row.has.length}/${row.needs.length}`)
-      .join(', ')}. On a Figma plan capped at one variable mode the extra modes cannot be created, and half of each collection will not exist.`;
+    banner.textContent = `模式不足：${short
+      .map((row) => `${row.collection} 现有 ${row.has.length}/${row.needs.length}`)
+      .join('，')}。若 Figma 套餐只允许一个变量模式，多出的模式无法创建，集合会缺一半。`;
     return;
   }
   if (multi.length > 0) {
     banner.className = 'banner';
-    banner.textContent = `${multi.length} collection(s) need ${multi[0].needs.join(' + ')} modes. A Figma plan capped at one mode will drop the second one — check the result summary.`;
+    banner.textContent = `${multi.length} 个集合需要 ${multi[0].needs.join(' + ')} 模式。单模式套餐会丢掉第二个 — 请核对结果摘要。`;
     return;
   }
   banner.className = 'banner hidden';
@@ -483,37 +516,37 @@ const renderModeBanner = (budget: Array<{ collection: string; needs: string[]; h
 const formatApplied = (payload: any) => {
   const summary = payload.summary;
   const lines = [
-    `Applied ${payload.total} entry(s): ${summary.unbound.length} empty shell(s) created, ${summary.existing.length} already existed and were left untouched.`,
+    `已应用 ${payload.total} 条：新建空壳 ${summary.unbound.length}，已存在未改动 ${summary.existing.length}。`,
     '',
-    `Every shell was created with a path and a type only — setValueForMode was never called, so each mode holds Figma's own initial value (COLOR → opaque black, FLOAT → 0, STRING → empty, BOOLEAN → false). They are marked "${unboundNote}" in the variable description.`,
+    `每个空壳只写入路径与类型 — 从未调用 setValueForMode，各模式保留 Figma 初值（COLOR→不透明黑，FLOAT→0，STRING→空，BOOLEAN→false）。描述中标记为「${unboundNote}」。`,
     ''
   ];
   for (const collection of summary.collections) {
     const missing = collection.missingModes.length
-      ? `, missing modes: ${collection.missingModes.join('/')}`
+      ? `，缺失模式：${collection.missingModes.join('/')}`
       : '';
-    lines.push(`  ${collection.name}${collection.created ? ' (created)' : ' (reused)'}${missing}`);
+    lines.push(`  ${collection.name}${collection.created ? '（新建）' : '（复用）'}${missing}`);
   }
   if (summary.modeLimit.length) {
     lines.push(
       '',
-      `MODE LIMIT — ${summary.modeLimit.length} mode(s) could not be created: ${summary.modeLimit.join(', ')}.`,
-      'This file\'s Figma plan caps variable modes. Those variables exist in the modes that were created only.'
+      `模式上限 — ${summary.modeLimit.length} 个模式无法创建：${summary.modeLimit.join(', ')}。`,
+      '当前文件的 Figma 套餐限制了变量模式数。这些变量只存在于已创建的模式中。'
     );
   }
   if (summary.skipped.length) {
-    lines.push('', `Skipped ${summary.skipped.length}:`);
+    lines.push('', `跳过 ${summary.skipped.length}：`);
     for (const item of summary.skipped.slice(0, 10)) lines.push(`  ${item.path} — ${item.reason}`);
   }
   if (payload.unfilledList) {
-    lines.push('', 'Still to fill:', payload.unfilledList);
+    lines.push('', '仍待填写：', payload.unfilledList);
   }
   return lines.join('\n');
 };
 
 const formatFullPlan = (payload: any) => {
   const lines = [
-    `Dry-run: ${payload.total} variable(s) across ${payload.collections.length} collection(s)`,
+    `干跑：${payload.total} 个变量，跨 ${payload.collections.length} 个集合`,
     ''
   ];
   for (const collection of payload.collections) {
@@ -522,24 +555,24 @@ const formatFullPlan = (payload: any) => {
     );
   }
   if (payload.invalid?.length) {
-    lines.push('', `Paradigm violations in the plan: ${payload.invalid.length}`);
+    lines.push('', `计划中的范式违规：${payload.invalid.length}`);
     for (const item of payload.invalid.slice(0, 10)) {
       lines.push(`  ${item.path} — ${item.issues.join('; ')}`);
     }
   }
-  lines.push('', 'First paths:', ...payload.sample.map((line: string) => `  ${line}`));
+  lines.push('', '路径示例：', ...payload.sample.map((line: string) => `  ${line}`));
   return lines.join('\n');
 };
 
 const formatReport = (payload: any) => {
   const lines = [
-    `Check: ${payload.total} local variable(s), ${payload.validCount} legal, ${payload.invalidCount} violating, ${payload.unfilledCount} still marked unfilled`,
-    `Paradigm collections present: ${payload.paradigmCollections.join(', ') || 'none'}`
+    `检查：本地变量 ${payload.total}，合法 ${payload.validCount}，违规 ${payload.invalidCount}，仍标记待填 ${payload.unfilledCount}`,
+    `已有范式集合：${payload.paradigmCollections.join(', ') || '无'}`
   ];
   if (payload.violations.length) {
-    lines.push('', 'Violations:');
+    lines.push('', '违规：');
     for (const row of payload.violations) {
-      lines.push(`  [${row.collection}] ${row.path}${row.retired ? '  (retired type)' : ''}`);
+      lines.push(`  [${row.collection}] ${row.path}${row.retired ? '  （已退役类型）' : ''}`);
       for (const issue of row.issues) lines.push(`      ${issue}`);
     }
   }
@@ -569,7 +602,7 @@ $<HTMLButtonElement>('backTo1').addEventListener('click', () => {
 });
 
 $<HTMLButtonElement>('toDryRun').addEventListener('click', () => {
-  write('Expanding…');
+  write('正在展开…');
   setStep(3);
   post({
     type: 'templateDryRun',
@@ -593,13 +626,10 @@ $<HTMLButtonElement>('copyUnfilled').addEventListener('click', () => copy(unfill
 
 $<HTMLButtonElement>('apply').addEventListener('click', () => {
   const total = totalCount();
-  if (
-    total > thresholds.confirm &&
-    !confirm(`${total} variables in one run. Create them all?`)
-  ) {
+  if (total > thresholds.confirm && !confirm(`一次创建 ${total} 个变量。确认全部创建？`)) {
     return;
   }
-  write('Applying…');
+  write('正在应用…');
   setStep(4);
   $<HTMLProgressElement>('progress').value = 0;
   post({
@@ -610,7 +640,7 @@ $<HTMLButtonElement>('apply').addEventListener('click', () => {
 });
 
 $<HTMLButtonElement>('fullDryRun').addEventListener('click', () => {
-  write('Expanding the complete paradigm…');
+  write('正在展开完整范式…');
   post({
     type: 'fullDryRun',
     namespaces: selectedNamespaces(),
@@ -622,13 +652,13 @@ $<HTMLButtonElement>('fullDryRun').addEventListener('click', () => {
 $<HTMLButtonElement>('fullApply').addEventListener('click', () => {
   const namespaces = selectedNamespaces();
   if (namespaces.length === 0) {
-    write('No namespace selected in the advanced section.', true);
+    write('高级区未选命名空间。', true);
     return;
   }
-  if (!confirm(`Write the complete paradigm with preset values for: ${namespaces.join(', ')}?`)) {
+  if (!confirm(`为以下命名空间写入含预设值的完整范式：${namespaces.join(', ')}？`)) {
     return;
   }
-  write('Applying the complete paradigm…');
+  write('正在应用完整范式…');
   post({
     type: 'fullApply',
     namespaces,
@@ -638,7 +668,7 @@ $<HTMLButtonElement>('fullApply').addEventListener('click', () => {
 });
 
 $<HTMLButtonElement>('validateFile').addEventListener('click', () => {
-  write('Reading local variables…');
+  write('正在读取本地变量…');
   post({ type: 'validateFile' });
 });
 
@@ -675,7 +705,7 @@ window.addEventListener('message', (event: MessageEvent) => {
   if (message.type === 'templateApplied') {
     unfilledList = message.unfilledList ?? '';
     $<HTMLProgressElement>('progress').value = $<HTMLProgressElement>('progress').max;
-    $('progressText').textContent = `Done — ${message.summary.unbound.length} empty shell(s).`;
+    $('progressText').textContent = `完成 — 空壳 ${message.summary.unbound.length} 个。`;
     write(formatApplied(message));
     return;
   }
@@ -684,9 +714,7 @@ window.addEventListener('message', (event: MessageEvent) => {
     return;
   }
   if (message.type === 'applied') {
-    write(
-      `Applied ${message.total} variable(s): ${message.summary.created} created, ${message.summary.updated} updated.`
-    );
+    write(`已应用 ${message.total} 个变量：新建 ${message.summary.created}，更新 ${message.summary.updated}。`);
     return;
   }
   if (message.type === 'report') {
@@ -694,7 +722,7 @@ window.addEventListener('message', (event: MessageEvent) => {
     return;
   }
   if (message.type === 'error') {
-    write(`Error: ${message.message}`, true);
+    write(`错误：${message.message}`, true);
   }
 });
 

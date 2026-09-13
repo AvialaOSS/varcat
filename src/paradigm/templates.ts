@@ -219,7 +219,7 @@ const stubTemplate = (entry: SpiralCatalog['components'][number]): ComponentTemp
   axes: STUB_AXES,
   exclude: [],
   extras: [],
-  note: 'Placeholder axes derived from the Spiral catalog. No appearance axis has been curated for this component yet.',
+  note: '占位轴来自 Spiral 目录。该组件尚未整理外观轴。',
   stub: true
 });
 

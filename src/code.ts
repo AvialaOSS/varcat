@@ -244,7 +244,7 @@ const main = async () => {
         if (selections.length === 0) {
           figma.ui.postMessage({
             type: 'error',
-            message: 'Nothing selected. Pick at least one template — VarCat never writes on an empty selection.'
+            message: '未选模板。请至少选一个模板 — VarCat 不会在空选择上写入。'
           });
           return;
         }
@@ -281,7 +281,7 @@ const main = async () => {
         if (plan.invalid.length > 0) {
           figma.ui.postMessage({
             type: 'error',
-            message: `Plan rejected: ${plan.invalid.length} path(s) violate the paradigm`,
+            message: `计划已拒绝：${plan.invalid.length} 条路径违反范式`,
             invalid: plan.invalid.map((result) => result.path)
           });
           return;
@@ -297,7 +297,7 @@ const main = async () => {
           unfilledList: formatUnboundList(summary.unbound)
         });
         figma.notify(
-          `VarCat: ${summary.unbound.length} empty shell(s) created, ${summary.existing.length} left as-is`
+          `VarCat：新建空壳 ${summary.unbound.length}，已存在未改 ${summary.existing.length}`
         );
         return;
       }
@@ -307,7 +307,7 @@ const main = async () => {
         if (namespaces.length === 0) {
           figma.ui.postMessage({
             type: 'error',
-            message: 'No namespace selected. Nothing to expand.'
+            message: '未选命名空间。无可展开内容。'
           });
           return;
         }
@@ -321,7 +321,7 @@ const main = async () => {
         if (plan.invalid.length > 0) {
           figma.ui.postMessage({
             type: 'error',
-            message: `Plan rejected: ${plan.invalid.length} path(s) violate the paradigm`,
+            message: `计划已拒绝：${plan.invalid.length} 条路径违反范式`,
             invalid: plan.invalid.map((result) => result.path)
           });
           return;
@@ -330,7 +330,7 @@ const main = async () => {
           onProgress: (progress) => figma.ui.postMessage({ type: 'progress', ...progress })
         });
         figma.ui.postMessage({ type: 'applied', total: plan.total, summary });
-        figma.notify(`VarCat: ${summary.created} created, ${summary.updated} updated`);
+        figma.notify(`VarCat：新建 ${summary.created}，更新 ${summary.updated}`);
         return;
       }
 
