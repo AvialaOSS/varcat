@@ -19,9 +19,12 @@
       *::after {
         box-sizing: border-box;
       }
+      /* `.vc-root` is ConfigProvider's wrapper (see main.tsx): the shell's
+         `height: 100%` needs an unbroken chain up to the iframe. */
       html,
       body,
-      #root {
+      #root,
+      .vc-root {
         height: 100%;
         margin: 0;
       }

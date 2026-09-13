@@ -13,7 +13,10 @@ createRoot(root).render(
   // No storageKey needed — Figma data: iframes cannot use real localStorage;
   // figma-storage-shim provides an in-memory stand-in for ThemeProvider.
   <ThemeProvider defaultMode="light">
-    <ConfigProvider locale={zhCN}>
+    {/* ConfigProvider wraps its children in a `dir` div. Left at `height: auto`
+        it breaks the panel's `height: 100%` chain, so the shell grows past the
+        iframe instead of scrolling its body. */}
+    <ConfigProvider locale={zhCN} className="vc-root">
       <App />
     </ConfigProvider>
   </ThemeProvider>
