@@ -8,6 +8,7 @@
   "scripts": {
     "build": "node ./scripts/build.mjs",
     "watch": "node ./scripts/build.mjs --watch",
+    "preview": "node ./scripts/build.mjs && node ./scripts/preview-ui.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
