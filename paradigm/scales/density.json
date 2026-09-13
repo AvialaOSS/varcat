@@ -1,0 +1,82 @@
+{
+  "collection": "scaleDensity",
+  "mode": "default",
+  "description": "Comfortable / touch density, carried over from ALD base-numbers Mobile Friendly: larger type, line-height and spacing, same radius and stroke ladder as scaleStatic.",
+  "values": {
+    "size": {
+      "none": 0,
+      "xs": 12,
+      "sm": 16,
+      "md": 18,
+      "lg": 20,
+      "xl": 22,
+      "xxl": 24,
+      "xxxl": 30,
+      "max": 38
+    },
+    "gap": {
+      "none": 0,
+      "xs": 6,
+      "sm": 8,
+      "md": 10,
+      "lg": 14,
+      "xl": 18,
+      "xxl": 24,
+      "xxxl": 32,
+      "max": 40
+    },
+    "padding": {
+      "none": 0,
+      "xs": 4,
+      "sm": 6,
+      "md": 10,
+      "lg": 14,
+      "xl": 18,
+      "xxl": 24,
+      "xxxl": 28,
+      "max": 36
+    },
+    "radius": {
+      "none": 0,
+      "xs": 2,
+      "sm": 6,
+      "md": 8,
+      "lg": 10,
+      "xl": 12,
+      "xxl": 16,
+      "xxxl": 24,
+      "max": 99
+    },
+    "thickness": {
+      "none": 0,
+      "xs": 1,
+      "sm": 2,
+      "md": 3,
+      "lg": 4
+    },
+    "lineHeight": {
+      "none": 0,
+      "xs": 16,
+      "sm": 20,
+      "md": 24,
+      "lg": 26,
+      "xl": 30,
+      "xxl": 34,
+      "xxxl": 46,
+      "max": 52
+    },
+    "weight": {
+      "light": 300,
+      "semilight": 350,
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700
+    },
+    "transparency": {
+      "loading": 0.6,
+      "disabled": 0.55,
+      "placeholder": 0.6
+    }
+  }
+}

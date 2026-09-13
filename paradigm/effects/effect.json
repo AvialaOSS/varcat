@@ -1,0 +1,31 @@
+{
+  "collection": "effect",
+  "modes": ["light", "dark"],
+  "description": "Literal effect colors. light mode values are carried over from ALD special-effort ON; dark mode values are the dark-surface counterparts. Only the paths listed in vocabulary.namespaces.effect.enabled are written by default.",
+  "values": {
+    "effect/glow-top": {
+      "light": "#FFD9CFFF",
+      "dark": "#4A2318FF"
+    },
+    "effect/glow-bottom": {
+      "light": "#FEFCFC00",
+      "dark": "#12100F00"
+    },
+    "effect/lineShadow-bottom": {
+      "light": "#0000000A",
+      "dark": "#0000003D"
+    },
+    "effect/lineShadow-bottomDeep": {
+      "light": "#00000014",
+      "dark": "#00000052"
+    },
+    "effect/lineShadow-all": {
+      "light": "#0000001F",
+      "dark": "#00000066"
+    },
+    "effect/softLight-all": {
+      "light": "#FFFFFF1F",
+      "dark": "#FFFFFF14"
+    }
+  }
+}

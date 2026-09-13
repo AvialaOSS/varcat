@@ -1,0 +1,291 @@
+{
+  "version": "1.0.0",
+  "description": "VarCat closed vocabulary for Aviala Design Figma Variables. Single source of truth: the plugin, the validator and the tests only read this file and the referenced matrices/aliases/scales.",
+  "charset": "a-zA-Z0-9-",
+  "rules": [
+    {
+      "id": "charset",
+      "title": "Charset is a-zA-Z0-9- plus / as the group separator",
+      "detail": "Underscore, space and dot are illegal anywhere in a variable path."
+    },
+    {
+      "id": "segment-start",
+      "title": "Every segment and every slot starts with a lowercase letter",
+      "detail": "A slot matches [a-z][a-zA-Z0-9]*. Numeric steps are written sN (s1 … s14), never 8."
+    },
+    {
+      "id": "group-required",
+      "title": "A group is mandatory and its first segment is the namespace layer",
+      "detail": "Path = {group}/{leaf}. Exactly two segments; the namespace table below fixes which slot is the group."
+    },
+    {
+      "id": "no-group-echo",
+      "title": "The leaf must not repeat the full group name",
+      "detail": "Compared against the whole group segment, not a prefix: button/button-filled-… is illegal, effect/effect-top is illegal, neutral/s1 is legal."
+    },
+    {
+      "id": "singular",
+      "title": "Singular only",
+      "detail": "button, not buttons. Slots ending in s are rejected unless listed in pluralSafeSlots."
+    },
+    {
+      "id": "closed-vocabulary",
+      "title": "Every slot draws from a closed list",
+      "detail": "The same word in two different slots is not automatically legal; namespace matrices narrow the cross product further."
+    },
+    {
+      "id": "hyphen-separates-slots",
+      "title": "- only separates slots",
+      "detail": "Multi-word slots use camelCase (bottomDeep, onColor, focusRing, lineHeight), never a hyphen."
+    }
+  ],
+  "pluralSafeSlots": ["success", "focus", "focusRing", "canvas", "progress", "status", "gloss"],
+  "steps": ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11", "s12", "s13", "s14"],
+  "namespaces": {
+    "palette": {
+      "collection": "palette",
+      "modes": ["light", "dark"],
+      "valueType": "COLOR",
+      "valueKind": "literal",
+      "shape": "{family}/{step}",
+      "groupSlot": "family",
+      "leafSlots": ["step"],
+      "slots": {
+        "family": ["primary", "success", "warning", "error", "info", "neutral"],
+        "step": ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11", "s12", "s13", "s14"]
+      },
+      "matrix": [
+        {
+          "key": "family",
+          "constrains": "step",
+          "allow": {
+            "primary": ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11", "s12"],
+            "success": ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11", "s12"],
+            "warning": ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11", "s12"],
+            "error": ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11", "s12"],
+            "info": ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11", "s12"],
+            "neutral": ["s1", "s2", "s3", "s4", "s5", "s6", "s7", "s8", "s9", "s10", "s11", "s12", "s13", "s14"]
+          }
+        }
+      ]
+    },
+    "semantic": {
+      "collection": "semantic",
+      "modes": ["light", "dark"],
+      "valueType": "COLOR",
+      "valueKind": "alias",
+      "aliasTarget": "palette",
+      "aliases": "aliases/semantic-to-palette.json",
+      "shape": "{use}/{tone}-{slot}",
+      "groupSlot": "use",
+      "leafSlots": ["tone", "slot"],
+      "slots": {
+        "use": ["border", "box", "control", "text"],
+        "tone": ["theme", "normal", "success", "warning", "error", "info"],
+        "slot": [
+          "primary",
+          "secondary",
+          "tertiary",
+          "soft",
+          "muted",
+          "canvas",
+          "inverse",
+          "onColor",
+          "title",
+          "caption",
+          "focus",
+          "disabled"
+        ]
+      },
+      "matrix": [
+        {
+          "key": "use",
+          "constrains": "slot",
+          "allow": {
+            "text": [
+              "primary",
+              "secondary",
+              "tertiary",
+              "muted",
+              "inverse",
+              "onColor",
+              "title",
+              "caption",
+              "disabled"
+            ],
+            "box": ["primary", "secondary", "soft", "canvas", "inverse", "muted"],
+            "border": ["primary", "secondary", "tertiary", "soft", "focus"],
+            "control": ["primary", "soft", "muted", "canvas", "inverse"]
+          }
+        }
+      ]
+    },
+    "scaleDensity": {
+      "collection": "scaleDensity",
+      "modes": ["default"],
+      "valueType": "FLOAT",
+      "valueKind": "literal",
+      "values": "scales/density.json",
+      "shape": "{category}/{step}",
+      "groupSlot": "category",
+      "leafSlots": ["step"],
+      "slots": {
+        "category": [
+          "size",
+          "gap",
+          "padding",
+          "radius",
+          "thickness",
+          "lineHeight",
+          "weight",
+          "transparency"
+        ],
+        "step": [
+          "none",
+          "xs",
+          "sm",
+          "md",
+          "lg",
+          "xl",
+          "xxl",
+          "xxxl",
+          "max",
+          "loading",
+          "disabled",
+          "placeholder",
+          "light",
+          "semilight",
+          "regular",
+          "medium",
+          "semibold",
+          "bold"
+        ]
+      },
+      "matrix": [
+        {
+          "key": "category",
+          "constrains": "step",
+          "allow": {
+            "size": ["none", "xs", "sm", "md", "lg", "xl", "xxl", "xxxl", "max"],
+            "gap": ["none", "xs", "sm", "md", "lg", "xl", "xxl", "xxxl", "max"],
+            "padding": ["none", "xs", "sm", "md", "lg", "xl", "xxl", "xxxl", "max"],
+            "radius": ["none", "xs", "sm", "md", "lg", "xl", "xxl", "xxxl", "max"],
+            "thickness": ["none", "xs", "sm", "md", "lg"],
+            "lineHeight": ["none", "xs", "sm", "md", "lg", "xl", "xxl", "xxxl", "max"],
+            "weight": ["light", "semilight", "regular", "medium", "semibold", "bold"],
+            "transparency": ["loading", "disabled", "placeholder"]
+          }
+        }
+      ]
+    },
+    "scaleContrast": {
+      "collection": "scaleContrast",
+      "modes": ["default"],
+      "valueType": "FLOAT",
+      "valueKind": "literal",
+      "values": "scales/contrast.json",
+      "sameShapeAs": "scaleDensity"
+    },
+    "scaleStatic": {
+      "collection": "scaleStatic",
+      "modes": ["default"],
+      "valueType": "FLOAT",
+      "valueKind": "literal",
+      "values": "scales/static.json",
+      "sameShapeAs": "scaleDensity"
+    },
+    "component": {
+      "collection": "component",
+      "modes": ["light", "dark"],
+      "valueType": "COLOR",
+      "valueKind": "alias",
+      "aliasTarget": "semantic",
+      "whitelist": "matrices/component.json",
+      "shape": "{type}/{component}-{level}-{role}-{state}",
+      "groupSlot": "type",
+      "leafSlots": ["component", "level", "role", "state"],
+      "slots": {
+        "type": [
+          "button",
+          "input",
+          "checkbox",
+          "radio",
+          "switch",
+          "select",
+          "tag",
+          "tab",
+          "link",
+          "badge",
+          "toast",
+          "dialog",
+          "menu",
+          "card",
+          "tooltip",
+          "progress",
+          "slider",
+          "avatar",
+          "divider",
+          "icon"
+        ],
+        "component": ["filled", "outlined", "ghost", "soft", "text"],
+        "level": ["primary", "secondary", "tertiary", "danger", "success", "neutral"],
+        "role": ["background", "foreground", "border", "icon", "label", "focusRing"],
+        "state": [
+          "rest",
+          "hover",
+          "active",
+          "focus",
+          "disabled",
+          "loading",
+          "selected",
+          "checked"
+        ]
+      },
+      "matrix": []
+    },
+    "effect": {
+      "collection": "effect",
+      "modes": ["light", "dark"],
+      "valueType": "COLOR",
+      "valueKind": "literal",
+      "values": "effects/effect.json",
+      "shape": "effect/{name}-{position}",
+      "groupSlot": "layer",
+      "leafSlots": ["name", "position"],
+      "slots": {
+        "layer": ["effect"],
+        "name": ["glow", "lineShadow", "softLight", "rim", "bloom"],
+        "position": ["top", "bottom", "all", "bottomDeep"]
+      },
+      "matrix": [
+        {
+          "key": "name",
+          "constrains": "position",
+          "allow": {
+            "glow": ["top", "bottom", "all"],
+            "lineShadow": ["top", "bottom", "all", "bottomDeep"],
+            "softLight": ["top", "bottom", "all"],
+            "rim": ["top", "bottom", "all"],
+            "bloom": ["top", "bottom", "all"]
+          }
+        }
+      ],
+      "enabled": [
+        "effect/glow-top",
+        "effect/glow-bottom",
+        "effect/lineShadow-bottom",
+        "effect/lineShadow-bottomDeep",
+        "effect/lineShadow-all",
+        "effect/softLight-all"
+      ]
+    },
+    "effectSwitch": {
+      "collection": "effectSwitch",
+      "modes": ["on", "off"],
+      "valueType": "COLOR",
+      "valueKind": "literal",
+      "values": "effects/effect-switch.json",
+      "sameShapeAs": "effect"
+    }
+  }
+}

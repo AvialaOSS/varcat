@@ -1,0 +1,31 @@
+{
+  "collection": "effectSwitch",
+  "modes": ["on", "off"],
+  "description": "Same paths as the effect collection, switched by mode instead of by theme. on = the ALD special-effort ON literals; off = fully transparent, which is how ALD special-effort OFF disables an effect.",
+  "values": {
+    "effect/glow-top": {
+      "on": "#FFD9CFFF",
+      "off": "#FFFFFF00"
+    },
+    "effect/glow-bottom": {
+      "on": "#FEFCFC00",
+      "off": "#FFFFFF00"
+    },
+    "effect/lineShadow-bottom": {
+      "on": "#0000000A",
+      "off": "#00000000"
+    },
+    "effect/lineShadow-bottomDeep": {
+      "on": "#00000014",
+      "off": "#00000000"
+    },
+    "effect/lineShadow-all": {
+      "on": "#0000001F",
+      "off": "#00000000"
+    },
+    "effect/softLight-all": {
+      "on": "#FFFFFF1F",
+      "off": "#FFFFFF00"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "varcat",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Figma plugin that creates Aviala Design Variables from a closed naming paradigm",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "build": "node ./scripts/build.mjs",
+    "watch": "node ./scripts/build.mjs --watch",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dry-run": "node ./scripts/dry-run.mjs",
+    "paradigm:generate": "node ./scripts/generate-paradigm.mjs"
+  },
+  "dependencies": {
+    "@aviala-design/color": "^0.5.16"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.99.0",
+    "@types/node": "^20.19.43",
+    "esbuild": "^0.23.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.1.0"
+  }
+}
