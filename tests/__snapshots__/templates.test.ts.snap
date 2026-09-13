@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`expansion snapshot > locks the hand-curated templates at full axes 1`] = `
+exports[`expansion snapshot > locks the curated templates at full axes 1`] = `
 [
   "component/button/primary-background-rest COLOR",
   "component/button/primary-background-hover COLOR",

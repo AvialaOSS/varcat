@@ -144,22 +144,16 @@ Three things to know about the model:
 
 ### Which components are fully templated
 
-**Hand-curated** (rich roles / exclude / extras), axes taken from Spiral:
-
+Eight components have curated axes taken from their real Spiral variants:
 `button` (`mode`), `switch` (checked/unchecked), `segmentator` (`mode`), `tab` (`style`),
 `badge` (`style`), `tag` (`level`), `alert` (`type`) and `input` (no appearance axis — its cva
-variants are layout only).
+variants are layout only, which is what makes the two-slot shape necessary).
 
-**Spiral-derived** (auto from `cva` / exported `DisplayNameMode|Style|Type|…` unions via
-`npm run spiral:catalog`): every other catalog component that declares an appearance prop — e.g.
-`link` (`mode`), `feedback` (`type`), `progress` (`type`), `radio` (`variant`), `popover`
-(`appearance`). These land in [`paradigm/templates/from-spiral.json`](paradigm/templates/from-spiral.json)
-and `paradigm/templates/component/auto/*.json`. Hand-curated files always win.
-
-**Stubs** remain only when Spiral exposes no appearance axis (size/layout-only components such as
-`colorPicker`, `timePicker`, `cascader`). They keep generic `role` × `state` words so a stub never
-invents an appearance word Spiral does not use. Promote one by adding a curated JSON (or by adding
-a real appearance prop upstream in developer-kit and re-running the catalog sync).
+The other 36 catalog components are selectable with generic `role` × `state` axes and no appearance
+axis. Those words (`background` / `foreground` / `border` / `icon`, `rest` / `hover` / `active` /
+`disabled`) are shared by every component, so a stub never invents an appearance word Spiral does not
+use. Curating one means adding a file under `paradigm/templates/component/` with the real variant
+list.
 
 ### Naming, in one example
 
@@ -179,23 +173,15 @@ never reads a color out of `@aviala-design/tokens`; the source of truth for a va
 [`paradigm/spiral-catalog.json`](paradigm/spiral-catalog.json) is derived, never hand-written:
 
 ```bash
-# clone AvialaOSS/developer-kit (or spiral-2 with the same packages/ui layout), then:
 npm run spiral:catalog -- --spiral /path/to/developer-kit
-# or: set SPIRAL_ROOT=/path/to/developer-kit && npm run spiral:catalog
-npm run spiral:catalog:check          # non-zero exit if catalog / from-spiral.json are stale
+npm run spiral:catalog:check          # non-zero exit if the committed file is stale
 ```
 
-The script reads:
-
-1. Storybook `title: "{group}/{Component}"` in `packages/ui/src/components/*.stories.tsx` for the
-   design-side grouping (`Foundation/Icons` dropped).
-2. Semantic effect CSS for each component's private property inventory.
-3. **Appearance axes** from each component's primary `.tsx`: `cva({ variants })` keys
-   (`mode` / `type` / `style` / …) and exported unions (`ButtonMode`, `AlertType`, `LinkMode`, …).
-
-44 components across 6 groups. It is a **manifest only**: no color value is ever synced. The
-developer-kit commit SHA is recorded as `spiralCommit`. Auto templates are written to
-`paradigm/templates/from-spiral.json` (and review copies under `component/auto/`).
+The script reads `packages/ui/src/components/*.stories.tsx` for the Storybook
+`title: "{group}/{Component}"` — the only listing that carries the design-side grouping — and the
+semantic effect CSS for each component's private property inventory. 44 components across 6 groups;
+`Foundation/Icons` is dropped because icons are a foundation, not a component. It is a **manifest
+only**: no value is ever synced.
 
 The component slug is the display name with a lowercase first letter (`NumberInput` → `numberInput`),
 which satisfies the camelCase slot rule for free.

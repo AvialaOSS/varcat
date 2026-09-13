@@ -1,11 +1,8 @@
 {
-  "source": "Spiral developer-kit — packages/ui/src/components/*.stories.tsx + cva/exported variant types",
+  "source": "Spiral developer-kit — packages/ui/src/components/*.stories.tsx",
   "note": "Manifest only. Values are never synced: the source of truth for a variable value is Figma, not npm.",
   "generatedBy": "scripts/sync-spiral-catalog.mjs",
-  "spiralCommit": "5f11055e27d54db34d57e828e084547671975bd1",
   "componentCount": 44,
-  "appearanceCount": 17,
-  "stubCount": 24,
   "groups": [
     {
       "name": "Basic Input",
@@ -162,26 +159,7 @@
         "--button-tiny-padding-x",
         "--button-tiny-padding-y",
         "--button-tiny-radius"
-      ],
-      "cvaKeys": [
-        "mode"
-      ],
-      "appearance": {
-        "prop": "mode",
-        "values": [
-          "primary",
-          "second",
-          "default",
-          "defaultCustom",
-          "outline",
-          "outlineCustom",
-          "noBackground",
-          "noBackgroundCustom",
-          "destructive"
-        ],
-        "via": "type:ButtonMode"
-      },
-      "curated": true
+      ]
     },
     {
       "displayName": "Link",
@@ -192,17 +170,7 @@
       "cssProperties": [
         "--link-fg-custom",
         "--link-fg-theme"
-      ],
-      "cvaKeys": [],
-      "appearance": {
-        "prop": "mode",
-        "values": [
-          "noBackground",
-          "noBackgroundCustom"
-        ],
-        "via": "type:LinkMode"
-      },
-      "curated": false
+      ]
     },
     {
       "displayName": "Segmentator",
@@ -243,17 +211,7 @@
         "--segmentator-tiled-bg",
         "--segmentator-transition-duration",
         "--segmentator-transition-easing"
-      ],
-      "cvaKeys": [],
-      "appearance": {
-        "prop": "mode",
-        "values": [
-          "nested",
-          "tiled"
-        ],
-        "via": "type:SegmentatorMode"
-      },
-      "curated": true
+      ]
     },
     {
       "displayName": "Switch",
@@ -297,10 +255,7 @@
         "--switch-transition-duration",
         "--switch-transition-easing",
         "--switch-width"
-      ],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": true
+      ]
     },
     {
       "displayName": "Cascader",
@@ -341,10 +296,7 @@
         "--cascader-menu-shadow",
         "--cascader-slot-gap",
         "--cascader-trigger-min-width"
-      ],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "Checkbox",
@@ -381,16 +333,13 @@
         "--checkbox-size-huge",
         "--checkbox-surface-easing",
         "--checkbox-unchecked-surface"
-      ],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "ColorPicker",
       "slug": "colorPicker",
       "group": "Information Collect",
-      "source": "packages/ui/src/components/color-picker/color-picker.tsx",
+      "source": "packages/ui/src/components/color-picker.tsx",
       "cssPropertyCount": 35,
       "cssProperties": [
         "--color-accent",
@@ -428,16 +377,13 @@
         "--color-ring",
         "--color-secondary",
         "--color-secondary-foreground"
-      ],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "DatePicker",
       "slug": "datePicker",
       "group": "Information Collect",
-      "source": "packages/ui/src/components/date-picker/date-picker.tsx",
+      "source": "packages/ui/src/components/date-picker.tsx",
       "cssPropertyCount": 34,
       "cssProperties": [
         "--datepicker-day-bg-hover",
@@ -474,17 +420,7 @@
         "--datepicker-weekday-bg",
         "--datepicker-weekday-fg",
         "--datepicker-weekday-height"
-      ],
-      "cvaKeys": [],
-      "appearance": {
-        "prop": "mode",
-        "values": [
-          "single",
-          "range"
-        ],
-        "via": "type:DatePickerMode"
-      },
-      "curated": false
+      ]
     },
     {
       "displayName": "Input",
@@ -529,10 +465,7 @@
         "--input-slot-py-big",
         "--input-slot-py-regular",
         "--input-surface-shadow"
-      ],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": true
+      ]
     },
     {
       "displayName": "NumberInput",
@@ -540,23 +473,13 @@
       "group": "Information Collect",
       "source": "packages/ui/src/components/number-input.tsx",
       "cssPropertyCount": 0,
-      "cssProperties": [],
-      "cvaKeys": [],
-      "appearance": {
-        "prop": "style",
-        "values": [
-          "default",
-          "monospaced"
-        ],
-        "via": "type:NumberInputStyle"
-      },
-      "curated": false
+      "cssProperties": []
     },
     {
       "displayName": "Radio",
       "slug": "radio",
       "group": "Information Collect",
-      "source": "packages/ui/src/components/radio-group.tsx",
+      "source": "packages/ui/src/components/radio.tsx",
       "cssPropertyCount": 16,
       "cssProperties": [
         "--radio-bg-unchecked",
@@ -575,17 +498,7 @@
         "--radio-label-fg",
         "--radio-shadow",
         "--radio-size"
-      ],
-      "cvaKeys": [],
-      "appearance": {
-        "prop": "variant",
-        "values": [
-          "normal",
-          "card"
-        ],
-        "via": "type:RadioInputVariant"
-      },
-      "curated": false
+      ]
     },
     {
       "displayName": "ScrollPicker",
@@ -618,10 +531,7 @@
         "--scroll-thumb-inset-small",
         "--scroll-track-padding-x",
         "--scroll-track-padding-y"
-      ],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "Select",
@@ -661,10 +571,7 @@
         "--select-menu-radius",
         "--select-menu-shadow",
         "--select-slot-gap"
-      ],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "Slider",
@@ -694,20 +601,7 @@
         "--slider-value-transition-duration",
         "--slider-value-transition-easing",
         "--slider-width"
-      ],
-      "cvaKeys": [
-        "size",
-        "type"
-      ],
-      "appearance": {
-        "prop": "type",
-        "values": [
-          "default",
-          "range"
-        ],
-        "via": "type:SliderType"
-      },
-      "curated": false
+      ]
     },
     {
       "displayName": "Textarea",
@@ -722,21 +616,15 @@
         "--textarea-min-height-regular",
         "--textarea-min-width",
         "--textarea-radius"
-      ],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "TimePicker",
       "slug": "timePicker",
       "group": "Information Collect",
-      "source": "packages/ui/src/components/time-picker/time-picker.tsx",
+      "source": "packages/ui/src/components/time-picker.tsx",
       "cssPropertyCount": 0,
-      "cssProperties": [],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      "cssProperties": []
     },
     {
       "displayName": "Upload",
@@ -756,19 +644,7 @@
         "--upload-large-px",
         "--upload-large-py",
         "--upload-radius"
-      ],
-      "cvaKeys": [
-        "style"
-      ],
-      "appearance": {
-        "prop": "style",
-        "values": [
-          "default",
-          "large"
-        ],
-        "via": "type:UploadStyle"
-      },
-      "curated": false
+      ]
     },
     {
       "displayName": "Avatar",
@@ -780,13 +656,7 @@
         "--avatar-bg",
         "--avatar-fg",
         "--avatar-size"
-      ],
-      "cvaKeys": [
-        "level",
-        "content"
-      ],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "Badge",
@@ -802,25 +672,7 @@
         "--badge-icon-slot-height",
         "--badge-px",
         "--badge-radius"
-      ],
-      "cvaKeys": [
-        "style",
-        "level",
-        "lineHeightFix"
-      ],
-      "appearance": {
-        "prop": "style",
-        "values": [
-          "theme",
-          "info",
-          "fail",
-          "warning",
-          "success",
-          "normal"
-        ],
-        "via": "type:BadgeStyle"
-      },
-      "curated": true
+      ]
     },
     {
       "displayName": "Drawer",
@@ -857,12 +709,7 @@
         "--drawer-overlay-bg",
         "--drawer-section-border",
         "--drawer-section-padding"
-      ],
-      "cvaKeys": [
-        "position"
-      ],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "Modal",
@@ -900,12 +747,7 @@
         "--modal-section-border",
         "--modal-section-px",
         "--modal-section-py"
-      ],
-      "cvaKeys": [
-        "size"
-      ],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "Table",
@@ -931,10 +773,7 @@
         "--table-head-py",
         "--table-icon-place-size",
         "--table-radius"
-      ],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "Tag",
@@ -951,20 +790,13 @@
         "--tag-icon-slot-height",
         "--tag-px",
         "--tag-radius"
-      ],
-      "cvaKeys": [
-        "level",
-        "content",
-        "lineHeightFix"
-      ],
-      "appearance": null,
-      "curated": true
+      ]
     },
     {
       "displayName": "Video",
       "slug": "video",
       "group": "Information Display",
-      "source": "packages/ui/src/components/video/video.tsx",
+      "source": "packages/ui/src/components/video.tsx",
       "cssPropertyCount": 26,
       "cssProperties": [
         "--video-bar-bg",
@@ -993,17 +825,7 @@
         "--video-stage-bg",
         "--video-volume-slider-size",
         "--video-width"
-      ],
-      "cvaKeys": [],
-      "appearance": {
-        "prop": "appearance",
-        "values": [
-          "default",
-          "light"
-        ],
-        "via": "type:VideoAppearance"
-      },
-      "curated": false
+      ]
     },
     {
       "displayName": "Alert",
@@ -1047,24 +869,7 @@
         "--alert-warning-bg-light",
         "--alert-warning-border",
         "--alert-warning-icon-fg"
-      ],
-      "cvaKeys": [
-        "type",
-        "size",
-        "appearance"
-      ],
-      "appearance": {
-        "prop": "type",
-        "values": [
-          "info",
-          "warning",
-          "error",
-          "success",
-          "neutral"
-        ],
-        "via": "type:AlertType"
-      },
-      "curated": true
+      ]
     },
     {
       "displayName": "Feedback",
@@ -1111,24 +916,7 @@
         "--feedback-wrong-bg-primary",
         "--feedback-wrong-border",
         "--feedback-wrong-icon-fg"
-      ],
-      "cvaKeys": [
-        "type",
-        "size",
-        "mode"
-      ],
-      "appearance": {
-        "prop": "type",
-        "values": [
-          "information",
-          "warning",
-          "wrong",
-          "success",
-          "normal"
-        ],
-        "via": "type:FeedbackType"
-      },
-      "curated": false
+      ]
     },
     {
       "displayName": "Progress",
@@ -1148,22 +936,7 @@
         "--progress-ring-stroke",
         "--progress-ring-track",
         "--progress-track-bg"
-      ],
-      "cvaKeys": [
-        "type",
-        "size",
-        "shape"
-      ],
-      "appearance": {
-        "prop": "type",
-        "values": [
-          "default",
-          "success",
-          "fail"
-        ],
-        "via": "type:ProgressType"
-      },
-      "curated": false
+      ]
     },
     {
       "displayName": "Breadcrumb",
@@ -1182,12 +955,7 @@
         "--breadcrumb-item-px",
         "--breadcrumb-item-radius",
         "--breadcrumb-separator-opacity"
-      ],
-      "cvaKeys": [
-        "size"
-      ],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "Card",
@@ -1210,10 +978,7 @@
         "--card-px",
         "--card-radius",
         "--card-trailing-gap"
-      ],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "List",
@@ -1249,10 +1014,7 @@
         "--list-separator-my",
         "--list-title-fg",
         "--list-title-px"
-      ],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "Navigation",
@@ -1294,17 +1056,7 @@
         "--navigation-section-px",
         "--navigation-transition-duration",
         "--navigation-transition-easing"
-      ],
-      "cvaKeys": [],
-      "appearance": {
-        "prop": "background",
-        "values": [
-          "none",
-          "default"
-        ],
-        "via": "type:NavigationBackground"
-      },
-      "curated": false
+      ]
     },
     {
       "displayName": "Pagehead",
@@ -1322,10 +1074,7 @@
         "--pagehead-px",
         "--pagehead-title-gap",
         "--pagehead-title-pl"
-      ],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "Pagination",
@@ -1348,10 +1097,7 @@
         "--pagination-page-py",
         "--pagination-page-radius",
         "--pagination-size-select-width"
-      ],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "Steps",
@@ -1380,12 +1126,7 @@
         "--steps-waiting-fg",
         "--steps-warning-bg",
         "--steps-warning-fg"
-      ],
-      "cvaKeys": [
-        "direction"
-      ],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "Tab",
@@ -1415,18 +1156,7 @@
         "--tab-slot-gap",
         "--tab-transition-duration",
         "--tab-transition-easing"
-      ],
-      "cvaKeys": [],
-      "appearance": {
-        "prop": "style",
-        "values": [
-          "default",
-          "card",
-          "tiled"
-        ],
-        "via": "type:TabStyle"
-      },
-      "curated": true
+      ]
     },
     {
       "displayName": "Anchor",
@@ -1434,10 +1164,7 @@
       "group": "System Composition",
       "source": "packages/ui/src/components/anchor.tsx",
       "cssPropertyCount": 0,
-      "cssProperties": [],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      "cssProperties": []
     },
     {
       "displayName": "FormField",
@@ -1445,10 +1172,7 @@
       "group": "System Composition",
       "source": "packages/ui/src/components/form-field.tsx",
       "cssPropertyCount": 0,
-      "cssProperties": [],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      "cssProperties": []
     },
     {
       "displayName": "HoverPopover",
@@ -1456,10 +1180,7 @@
       "group": "System Composition",
       "source": "packages/ui/src/components/hover-popover.tsx",
       "cssPropertyCount": 0,
-      "cssProperties": [],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      "cssProperties": []
     },
     {
       "displayName": "Popover",
@@ -1479,18 +1200,7 @@
         "--popover-content-radius",
         "--popover-content-shadow",
         "--popover-foreground"
-      ],
-      "cvaKeys": [],
-      "appearance": {
-        "prop": "appearance",
-        "values": [
-          "default",
-          "tooltip",
-          "primary"
-        ],
-        "via": "type:PopoverAppearance"
-      },
-      "curated": false
+      ]
     },
     {
       "displayName": "ResponsiveTooltip",
@@ -1498,10 +1208,7 @@
       "group": "System Composition",
       "source": "packages/ui/src/components/responsive-tooltip.tsx",
       "cssPropertyCount": 0,
-      "cssProperties": [],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      "cssProperties": []
     },
     {
       "displayName": "Scroll",
@@ -1534,13 +1241,7 @@
         "--scroll-thumb-inset-small",
         "--scroll-track-padding-x",
         "--scroll-track-padding-y"
-      ],
-      "cvaKeys": [
-        "size",
-        "orientation"
-      ],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "Tooltip",
@@ -1556,10 +1257,7 @@
         "--tooltip-content-py",
         "--tooltip-content-radius",
         "--tooltip-content-shadow"
-      ],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      ]
     },
     {
       "displayName": "Typeface",
@@ -1567,10 +1265,7 @@
       "group": "System Composition",
       "source": "packages/ui/src/components/typeface.tsx",
       "cssPropertyCount": 0,
-      "cssProperties": [],
-      "cvaKeys": [],
-      "appearance": null,
-      "curated": false
+      "cssProperties": []
     },
     {
       "displayName": "Typography",
@@ -1578,19 +1273,7 @@
       "group": "System Composition",
       "source": "packages/ui/src/components/typography.tsx",
       "cssPropertyCount": 0,
-      "cssProperties": [],
-      "cvaKeys": [
-        "level"
-      ],
-      "appearance": {
-        "prop": "tone",
-        "values": [
-          "default",
-          "white"
-        ],
-        "via": "type:TypographyTone"
-      },
-      "curated": false
+      "cssProperties": []
     }
   ]
 }
