@@ -189,6 +189,18 @@ export function App() {
     [selected]
   );
 
+  /**
+   * Editing the selection invalidates the dry-run: its path list no longer
+   * describes what Apply would write, so drop it and re-lock the preview step.
+   */
+  const selectionKey = useMemo(() => JSON.stringify(selectionPayload()), [selectionPayload]);
+  useEffect(() => {
+    setDryRunPaths([]);
+    setPlanStats(null);
+    setApplied(null);
+    setApplyDisabled(true);
+  }, [selectionKey]);
+
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
       const message = event.data?.pluginMessage;
@@ -412,11 +424,15 @@ export function App() {
   /** Step 3 needs a dry-run; step 4 is only reachable by applying. */
   const maxStep = selected.size === 0 ? 1 : dryRunPaths.length > 0 ? 3 : 2;
 
+  /**
+   * `waiting` is the tinted "queued" pill and `default` the plain one, so a step
+   * you can already open gets the tint and a locked one stays neutral.
+   */
   const stepState = (index: number) => {
     const number = index + 1;
     if (number < step) return 'done' as const;
     if (number === step) return 'inProgress' as const;
-    return number <= maxStep ? ('default' as const) : ('waiting' as const);
+    return number <= maxStep ? ('waiting' as const) : ('default' as const);
   };
 
   const gotoStep = (number: number) => {
