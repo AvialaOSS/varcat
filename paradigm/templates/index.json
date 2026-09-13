@@ -1,0 +1,26 @@
+{
+  "version": "2.0.0",
+  "description": "Template registry. A template is an opt-in slice of the paradigm: nothing is selected by default, and Apply creates empty shells (path + type only, no mode value).",
+  "unboundNote": "VarCat: 待填",
+  "thresholds": {
+    "warn": 200,
+    "confirm": 500
+  },
+  "templates": [
+    { "id": "layer.palette", "file": "layer/palette.json", "kind": "layer", "default": false },
+    { "id": "layer.semantic", "file": "layer/semantic.json", "kind": "layer", "default": false },
+    { "id": "layer.scaleStatic", "file": "layer/scale-static.json", "kind": "layer", "default": false },
+    { "id": "layer.scaleDensity", "file": "layer/scale-density.json", "kind": "layer", "default": false },
+    { "id": "layer.scaleContrast", "file": "layer/scale-contrast.json", "kind": "layer", "default": false },
+    { "id": "layer.effect", "file": "layer/effect.json", "kind": "layer", "default": false },
+    { "id": "layer.effectSwitch", "file": "layer/effect-switch.json", "kind": "layer", "default": false },
+    { "id": "spiral.button", "file": "component/button.json", "kind": "component", "default": false },
+    { "id": "spiral.input", "file": "component/input.json", "kind": "component", "default": false },
+    { "id": "spiral.switch", "file": "component/switch.json", "kind": "component", "default": false },
+    { "id": "spiral.segmentator", "file": "component/segmentator.json", "kind": "component", "default": false },
+    { "id": "spiral.tab", "file": "component/tab.json", "kind": "component", "default": false },
+    { "id": "spiral.badge", "file": "component/badge.json", "kind": "component", "default": false },
+    { "id": "spiral.tag", "file": "component/tag.json", "kind": "component", "default": false },
+    { "id": "spiral.alert", "file": "component/alert.json", "kind": "component", "default": false }
+  ]
+}

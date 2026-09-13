@@ -1,0 +1,9 @@
+{
+  "id": "layer.semantic",
+  "kind": "layer",
+  "namespace": "semantic",
+  "label": "Semantic",
+  "labelZh": "语义层",
+  "summary": "border / box / control / text surfaces per tone.",
+  "summaryZh": "按语气划分的 border / box / control / text 表面。"
+}

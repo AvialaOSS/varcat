@@ -1,0 +1,46 @@
+{
+  "id": "spiral.tag",
+  "kind": "component",
+  "spiral": {
+    "displayName": "Tag",
+    "group": "Information Display",
+    "source": "packages/ui/src/components/tag.tsx",
+    "variantProp": "level",
+    "cssReference": "packages/tokens/src/semantic/information-display-extras.css"
+  },
+  "note": "Spiral Tag varies by typographic level, not by color intent.",
+  "collection": "component",
+  "modes": ["light", "dark"],
+  "group": "tag",
+  "shape": "{variant}-{role}-{state}",
+  "valueType": "COLOR",
+  "axes": [
+    {
+      "slot": "variant",
+      "label": "Appearance",
+      "labelZh": "外观",
+      "values": ["caption", "text"],
+      "default": ["caption"]
+    },
+    {
+      "slot": "role",
+      "label": "Part",
+      "labelZh": "部位",
+      "values": ["background", "foreground", "border", "icon"],
+      "default": ["background", "foreground"]
+    },
+    {
+      "slot": "state",
+      "label": "State",
+      "labelZh": "状态",
+      "values": ["rest", "hover", "active", "disabled"],
+      "default": ["rest"]
+    }
+  ],
+  "exclude": [],
+  "extras": [
+    { "path": "tag/radius", "valueType": "FLOAT" },
+    { "path": "tag/paddingX", "valueType": "FLOAT" },
+    { "path": "tag/gap", "valueType": "FLOAT" }
+  ]
+}

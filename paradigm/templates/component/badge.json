@@ -1,0 +1,49 @@
+{
+  "id": "spiral.badge",
+  "kind": "component",
+  "spiral": {
+    "displayName": "Badge",
+    "group": "Information Display",
+    "source": "packages/ui/src/components/badge.tsx",
+    "variantProp": "style",
+    "cssReference": "packages/tokens/src/semantic/badge-effects.css"
+  },
+  "note": "The variant list is Spiral's badge style prop verbatim, so it keeps fail rather than the semantic layer's error.",
+  "collection": "component",
+  "modes": ["light", "dark"],
+  "group": "badge",
+  "shape": "{variant}-{role}-{state}",
+  "valueType": "COLOR",
+  "axes": [
+    {
+      "slot": "variant",
+      "label": "Appearance",
+      "labelZh": "外观",
+      "values": ["theme", "info", "fail", "warning", "success", "normal"],
+      "default": ["theme", "fail"]
+    },
+    {
+      "slot": "role",
+      "label": "Part",
+      "labelZh": "部位",
+      "values": ["background", "foreground", "border", "icon"],
+      "default": ["background", "foreground"]
+    },
+    {
+      "slot": "state",
+      "label": "State",
+      "labelZh": "状态",
+      "note": "A badge is not interactive; rest is the honest default.",
+      "values": ["rest", "hover", "disabled"],
+      "default": ["rest"]
+    }
+  ],
+  "exclude": [
+    { "why": "a badge has no pointer affordance on its border", "role": ["border"], "state": ["hover"] }
+  ],
+  "extras": [
+    { "path": "badge/icon-size", "valueType": "FLOAT", "note": "--badge-icon-size" },
+    { "path": "badge/radius", "valueType": "FLOAT" },
+    { "path": "badge/paddingX", "valueType": "FLOAT" }
+  ]
+}

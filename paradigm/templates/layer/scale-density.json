@@ -1,0 +1,9 @@
+{
+  "id": "layer.scaleDensity",
+  "kind": "layer",
+  "namespace": "scaleDensity",
+  "label": "Scale — density",
+  "labelZh": "尺度 · 密度",
+  "summary": "Same ladder keys as the static scale, tuned for a roomier layout.",
+  "summaryZh": "与静态尺度同键，面向更宽松的布局。"
+}

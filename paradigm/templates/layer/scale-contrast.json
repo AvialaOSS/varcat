@@ -1,0 +1,9 @@
+{
+  "id": "layer.scaleContrast",
+  "kind": "layer",
+  "namespace": "scaleContrast",
+  "label": "Scale — contrast",
+  "labelZh": "尺度 · 对比",
+  "summary": "Same ladder keys as the static scale, tuned for higher contrast.",
+  "summaryZh": "与静态尺度同键，面向更高对比。"
+}

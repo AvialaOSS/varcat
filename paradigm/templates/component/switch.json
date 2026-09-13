@@ -1,0 +1,52 @@
+{
+  "id": "spiral.switch",
+  "kind": "component",
+  "spiral": {
+    "displayName": "Switch",
+    "group": "Basic Input",
+    "source": "packages/ui/src/components/switch.tsx",
+    "variantProp": "checked",
+    "cssReference": "packages/tokens/src/semantic/basic-input-effects.css"
+  },
+  "collection": "component",
+  "modes": ["light", "dark"],
+  "group": "switch",
+  "shape": "{variant}-{role}-{state}",
+  "valueType": "COLOR",
+  "axes": [
+    {
+      "slot": "variant",
+      "label": "Appearance",
+      "labelZh": "外观",
+      "note": "The Switch appearance axis is the checked state, not a cva variant.",
+      "values": ["checked", "unchecked"],
+      "default": ["checked", "unchecked"]
+    },
+    {
+      "slot": "role",
+      "label": "Part",
+      "labelZh": "部位",
+      "values": ["track", "thumb", "surface", "gloss", "shadow"],
+      "default": ["track", "thumb"]
+    },
+    {
+      "slot": "state",
+      "label": "State",
+      "labelZh": "状态",
+      "values": ["rest", "hover", "active", "focus", "disabled"],
+      "default": ["rest", "hover", "active"]
+    }
+  ],
+  "exclude": [
+    { "why": "the lifted surface and its gloss only exist while checked", "variant": ["unchecked"], "role": ["surface", "gloss"] },
+    { "why": "the thumb shadow does not change with pointer state", "role": ["shadow"], "state": ["hover", "active", "focus", "disabled"] }
+  ],
+  "extras": [
+    { "path": "switch/regular-width", "valueType": "FLOAT", "note": "--switch-width" },
+    { "path": "switch/regular-height", "valueType": "FLOAT", "note": "--switch-height-regular" },
+    { "path": "switch/small-height", "valueType": "FLOAT", "note": "--switch-height-small" },
+    { "path": "switch/regular-thumbSize", "valueType": "FLOAT", "note": "--switch-thumb-size-regular" },
+    { "path": "switch/small-thumbSize", "valueType": "FLOAT", "note": "--switch-thumb-size-small" },
+    { "path": "switch/track-padding", "valueType": "FLOAT", "note": "--switch-padding" }
+  ]
+}

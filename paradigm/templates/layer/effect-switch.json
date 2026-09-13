@@ -1,0 +1,9 @@
+{
+  "id": "layer.effectSwitch",
+  "kind": "layer",
+  "namespace": "effectSwitch",
+  "label": "Effect switch",
+  "labelZh": "特效开关",
+  "summary": "The same effect paths on an on/off pair of modes.",
+  "summaryZh": "同一批特效路径，改成 on/off 两个模式。"
+}

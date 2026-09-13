@@ -1,0 +1,9 @@
+{
+  "id": "layer.scaleStatic",
+  "kind": "layer",
+  "namespace": "scaleStatic",
+  "label": "Scale — static",
+  "labelZh": "尺度 · 静态",
+  "summary": "size / gap / padding / radius / thickness / lineHeight / weight / transparency ladders.",
+  "summaryZh": "size / gap / padding / radius / thickness / lineHeight / weight / transparency 阶梯。"
+}

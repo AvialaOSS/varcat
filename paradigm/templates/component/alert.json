@@ -1,0 +1,50 @@
+{
+  "id": "spiral.alert",
+  "kind": "component",
+  "spiral": {
+    "displayName": "Alert",
+    "group": "Response And Feedback",
+    "source": "packages/ui/src/components/alert.tsx",
+    "variantProp": "type",
+    "cssReference": "packages/tokens/src/semantic/alert-effects.css"
+  },
+  "collection": "component",
+  "modes": ["light", "dark"],
+  "group": "alert",
+  "shape": "{variant}-{role}-{state}",
+  "valueType": "COLOR",
+  "axes": [
+    {
+      "slot": "variant",
+      "label": "Appearance",
+      "labelZh": "外观",
+      "note": "Spiral AlertType, verbatim.",
+      "values": ["info", "warning", "error", "success", "neutral"],
+      "default": ["info", "error"]
+    },
+    {
+      "slot": "role",
+      "label": "Part",
+      "labelZh": "部位",
+      "values": ["background", "foreground", "border", "icon", "title"],
+      "default": ["background", "foreground", "icon"]
+    },
+    {
+      "slot": "state",
+      "label": "State",
+      "labelZh": "状态",
+      "note": "An alert is a static surface; only its close affordance hovers.",
+      "values": ["rest", "hover"],
+      "default": ["rest"]
+    }
+  ],
+  "exclude": [
+    { "why": "only the foreground carries the close affordance", "role": ["background", "border", "icon", "title"], "state": ["hover"] }
+  ],
+  "extras": [
+    { "path": "alert/radius", "valueType": "FLOAT" },
+    { "path": "alert/paddingX", "valueType": "FLOAT" },
+    { "path": "alert/paddingY", "valueType": "FLOAT" },
+    { "path": "alert/gap", "valueType": "FLOAT" }
+  ]
+}

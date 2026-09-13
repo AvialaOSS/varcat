@@ -1,0 +1,9 @@
+{
+  "id": "layer.effect",
+  "kind": "layer",
+  "namespace": "effect",
+  "label": "Effect",
+  "labelZh": "特效",
+  "summary": "glow / lineShadow / softLight overlays, switched by theme.",
+  "summaryZh": "glow / lineShadow / softLight 叠层，按主题切换。"
+}
