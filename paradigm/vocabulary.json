@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "description": "VarCat closed vocabulary for Aviala Design Figma Variables. Single source of truth: the plugin, the validator and the tests only read this file and the referenced matrices/aliases/scales.",
+  "description": "VarCat closed vocabulary for Spiral-named Figma Variables. Single source of truth for the naming rules and the namespace shapes: the plugin, the validator and the tests only read this file and the referenced matrices/aliases/scales/templates. Component type words come from paradigm/spiral-catalog.json, derived from the Spiral developer-kit.",
   "charset": "a-zA-Z0-9-",
   "rules": [
     {
