@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>VarCat</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 11px;
+      }
+
+      body {
+        margin: 0;
+        padding: 12px;
+        color: var(--figma-color-text);
+        background: var(--figma-color-bg);
+      }
+
+      h1 {
+        margin: 0 0 2px;
+        font-size: 13px;
+      }
+
+      p.lede {
+        margin: 0 0 12px;
+        color: var(--figma-color-text-secondary);
+      }
+
+      fieldset {
+        margin: 0 0 12px;
+        padding: 8px 10px 10px;
+        border: 1px solid var(--figma-color-border);
+        border-radius: 6px;
+      }
+
+      legend {
+        padding: 0 4px;
+        font-weight: 600;
+      }
+
+      ul.namespaces {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      ul.namespaces li {
+        display: flex;
+        gap: 6px;
+        align-items: baseline;
+        padding: 3px 0;
+      }
+
+      ul.namespaces code {
+        color: var(--figma-color-text-secondary);
+      }
+
+      .meta {
+        margin-left: auto;
+        color: var(--figma-color-text-tertiary);
+      }
+
+      .seeds {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+      }
+
+      label.seed {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      input[type='text'] {
+        width: 90px;
+        padding: 3px 5px;
+        color: var(--figma-color-text);
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        background: var(--figma-color-bg-secondary);
+        border: 1px solid var(--figma-color-border);
+        border-radius: 4px;
+      }
+
+      .actions {
+        display: flex;
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+
+      button {
+        flex: 1;
+        padding: 6px 8px;
+        font-weight: 600;
+        background: var(--figma-color-bg-secondary);
+        color: var(--figma-color-text);
+        border: 1px solid var(--figma-color-border);
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      button.primary {
+        background: var(--figma-color-bg-brand);
+        color: var(--figma-color-text-onbrand);
+        border-color: transparent;
+      }
+
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+
+      #output {
+        margin: 0;
+        padding: 8px;
+        max-height: 260px;
+        overflow: auto;
+        white-space: pre-wrap;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        background: var(--figma-color-bg-secondary);
+        border-radius: 6px;
+      }
+
+      .error {
+        color: var(--figma-color-text-danger);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>VarCat</h1>
+    <p class="lede">Create Aviala Design Figma Variables from the closed paradigm vocabulary.</p>
+
+    <fieldset>
+      <legend>Namespaces</legend>
+      <ul class="namespaces" id="namespaces"></ul>
+      <label style="display: flex; gap: 6px; margin-top: 8px; align-items: center">
+        <input type="checkbox" id="allEffects" />
+        Expand every legal effect path (default: enabled whitelist only)
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Palette seeds</legend>
+      <div class="seeds" id="seeds"></div>
+    </fieldset>
+
+    <div class="actions">
+      <button id="dryRun">Dry-run</button>
+      <button id="validate">Validate selection</button>
+      <button id="apply" class="primary">Apply</button>
+    </div>
+
+    <pre id="output">Ready.</pre>
+
+    <script src="ui.js"></script>
+  </body>
+</html>
