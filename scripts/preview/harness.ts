@@ -15,8 +15,14 @@ import {
 } from '../../src/paradigm/templates';
 import { getNamespace, NAMESPACE_KEYS, vocabulary } from '../../src/paradigm/vocabulary';
 
+/**
+ * `init` names both a request and a response, so replies carry a marker: with
+ * `parent === window` the harness would otherwise answer itself forever.
+ */
+const FROM_HARNESS = '__varcatPreviewReply';
+
 const reply = (message: Record<string, unknown>) => {
-  window.postMessage({ pluginMessage: message }, '*');
+  window.postMessage({ pluginMessage: { ...message, [FROM_HARNESS]: true } }, '*');
 };
 
 const initPayload = () => ({
@@ -109,7 +115,7 @@ const REQUESTS = new Set([
 
 window.addEventListener('message', (event: MessageEvent) => {
   const message = event.data?.pluginMessage;
-  if (!message || !REQUESTS.has(message.type)) return;
+  if (!message || message[FROM_HARNESS] || !REQUESTS.has(message.type)) return;
 
   // `parent === window` here, so the panel would otherwise hear its own request.
   // This listener is registered first, so stopping propagation hides it.
