@@ -37,8 +37,9 @@ export const ensureCollection = async (
       modeIds[mode] = found.modeId;
       return;
     }
-    if (index === 0 && collection.modes.length === 1 && modes.length > 1) {
-      // Fresh collection: adopt the default mode as the first paradigm mode.
+    if (index === 0 && !existing && collection.modes.length === 1 && modes.length > 1) {
+      // Fresh collection: adopt the default mode as the first paradigm mode. A
+      // collection the user already had keeps its own mode names.
       const fallback = collection.modes[0];
       if (!modes.includes(fallback.name)) {
         collection.renameMode(fallback.modeId, mode);
@@ -46,7 +47,7 @@ export const ensureCollection = async (
         return;
       }
     }
-    if (collection.modes.length === 1 && modes.length === 1) {
+    if (!existing && collection.modes.length === 1 && modes.length === 1) {
       collection.renameMode(collection.modes[0].modeId, mode);
       modeIds[mode] = collection.modes[0].modeId;
       return;
