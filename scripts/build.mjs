@@ -32,6 +32,8 @@ const buildOnce = async () => {
 
   const uiResult = await build({
     ...shared,
+    // Figma plugin UI is a data: iframe — sourceMappingURL fetch is CSP-blocked.
+    sourcemap: false,
     entryPoints: [path.join(srcDir, 'ui', 'main.tsx')],
     outfile: path.join(distDir, 'ui.js'),
     format: 'iife',
@@ -54,6 +56,8 @@ const buildOnce = async () => {
   // rest of the bundle as visible page text.
   const inlineCss = spiralCss.replace(/<\/style/gi, '<\\/style');
   const inlineJs = uiJs
+    .replace(/\/\/[#@]\s*sourceMappingURL\s*=\s*\S+/g, '')
+    .replace(/\/\*[#@]\s*sourceMappingURL\s*=\s*\S+\s*\*\//g, '')
     .replace(/<\/script/gi, '<\\/script')
     .replace(/<!--/g, '<\\!--');
 
