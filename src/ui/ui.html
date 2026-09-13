@@ -5,98 +5,143 @@
     <title>VarCat · Spiral</title>
     <style id="spiral-styles">/* __SPIRAL_CSS__ */</style>
     <style>
-      /* Plugin shell only — chrome comes from @aviala-design/spiral components + styles.css */
+      /*
+       * Plugin shell only. Chrome, type and colour come from
+       * @aviala-design/spiral components + styles.css; what is left here is the
+       * fixed-height iframe frame (header / scrolling body / action footer),
+       * the monospace path type Spiral has no scale for, and a few flex
+       * affordances Stack does not expose (wrap, grow, push-to-end).
+       */
+      /* Spiral's dist CSS ships no preflight; without this every padded
+         full-width child overflows the narrow iframe by its own padding. */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
       html,
       body,
       #root {
+        height: 100%;
         margin: 0;
-        min-height: 100%;
       }
       body {
-        background: var(--sp-color-bg, #f9f8f8);
+        background: var(--color-background, #f9f8f8);
+        overflow: hidden;
       }
+
+      /* Surfaces default to the page tone; lift them so cards read as cards.
+         The stock selected row is the theme secondary fill — too loud when a
+         dozen rows are ticked at once. */
       .vc-shell {
-        padding: 14px;
-      }
-      .vc-mono {
-        font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
-        font-size: 11px;
-        white-space: pre-wrap;
-        word-break: break-word;
-      }
-      .vc-output {
-        max-height: 300px;
-        overflow: auto;
-        padding: 10px 12px;
-        border-radius: 8px;
-        border: 1px solid var(--sp-color-border-strong, #d6d5d4);
-        background: var(--sp-color-surface, #fff);
-      }
-      .vc-output.error {
-        color: var(--sp-color-danger, #ff1d4e);
-      }
-      .vc-row {
+        --list-bg: var(--box-box-normal-background-whiteonly, #ffffff);
+        --card-bg: var(--box-box-normal-background-whiteonly, #ffffff);
+        --list-item-selected-bg: var(--box-box-theme-lightbackground, #ffe9e3);
         display: flex;
-        gap: 8px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-      .vc-row > .grow {
-        flex: 1;
+        flex-direction: column;
+        height: 100%;
         min-width: 0;
       }
-      .vc-chips {
+      .vc-shell > .aviala-pagehead {
+        flex: none;
+        padding-inline: var(--padding-big, 14px);
+      }
+
+      /* Four steps must fit ~380px: drop the 120px per-step floor. */
+      .vc-rail {
+        flex: none;
+        padding: var(--padding-default, 8px) var(--padding-big, 14px);
+        background: var(--box-box-normal-background-whiteonly, #ffffff);
+        border-bottom: 1px solid var(--border-border-normal-1, #f0efef);
+      }
+      .vc-rail .aviala-steps {
+        --steps-item-min-width: 0;
+        --steps-gap: var(--gap-component-space, 8px);
+      }
+      .vc-step {
+        min-width: 0;
+      }
+      .vc-step[data-clickable='true'] {
+        cursor: pointer;
+      }
+
+      .vc-body {
+        flex: 1 1 auto;
+        min-height: 0;
+      }
+      .vc-body-inner {
+        padding: var(--padding-middle, 10px) var(--padding-big, 14px)
+          var(--padding-big, 14px);
+      }
+
+      .vc-foot {
+        flex: none;
+        padding: var(--padding-middle, 10px) var(--padding-big, 14px);
+        background: var(--box-box-normal-background-whiteonly, #ffffff);
+        border-top: 1px solid var(--border-border-normal-1, #f0efef);
+      }
+
+      .vc-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 4px;
+        align-items: center;
+        gap: var(--gap-component-space, 8px);
+        min-width: 0;
       }
-      .vc-meta {
-        margin-left: auto;
-        opacity: 0.65;
-        font-size: 11px;
-        font-variant-numeric: tabular-nums;
+      .vc-row--tight {
+        gap: var(--gap-inside, 4px);
+      }
+      .vc-grow {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+      .vc-equal {
+        flex: 1 1 0;
+        min-width: 0;
+      }
+      .vc-push {
+        margin-inline-start: auto;
+      }
+      .vc-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
         white-space: nowrap;
       }
-      .vc-group {
-        border: 1px solid var(--sp-color-border-strong, #d6d5d4);
-        border-radius: 8px;
-        overflow: hidden;
-        background: var(--sp-color-surface, #fff);
+      .vc-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--gap-component-space, 8px);
       }
-      .vc-group > summary {
-        padding: 8px 10px;
-        cursor: pointer;
-        list-style: none;
-        background: var(--sp-color-muted, #f0efef);
-        font-weight: 600;
-        font-size: 11px;
+
+      .vc-mono {
+        font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+        font-size: var(--typography-caption-size, 0.75rem);
+        line-height: var(--typography-caption-line-height, 1rem);
       }
-      .vc-group > summary::-webkit-details-marker {
-        display: none;
+      .vc-log {
+        margin: 0;
+        padding: var(--padding-middle, 10px) var(--padding-big, 14px);
+        white-space: pre-wrap;
+        word-break: break-word;
+        color: var(--typography-caption-fg, #616060);
       }
-      .vc-group-count {
-        float: right;
-        font-weight: 400;
-        opacity: 0.7;
+
+      /* Dense path table — hundreds of rows, so rows stay cheap. */
+      .vc-paths {
+        padding: var(--padding-small, 6px) 0;
       }
-      .vc-template-row {
+      .vc-path {
         display: flex;
-        gap: 8px;
-        align-items: center;
-        padding: 6px 10px;
-        border-top: 1px solid var(--sp-color-border, #f0efef);
+        gap: var(--gap-inside, 4px);
+        padding: 1px var(--padding-big, 14px);
       }
-      .vc-panel {
-        padding: 10px 12px;
-        border: 1px solid var(--sp-color-border-strong, #d6d5d4);
-        border-radius: 8px;
-        background: var(--sp-color-surface, #fff);
+      .vc-path__mark {
+        width: 1ch;
+        flex: none;
+        color: var(--typography-caption-fg, #616060);
       }
-      .vc-advanced > summary {
-        cursor: pointer;
-        padding: 8px 0;
-        opacity: 0.75;
-        font-size: 11px;
+      .vc-path__mark[data-status='new'] {
+        color: var(--text-text-theme-primary-black, #bf2300);
       }
     </style>
   </head>

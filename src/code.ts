@@ -185,7 +185,9 @@ const validateFile = async () => {
 };
 
 const main = async () => {
-  figma.showUI(UI_HTML, { width: 520, height: 760, themeColors: true });
+  // Panel is laid out for a dense plugin column; 520 left the step rail and
+  // path list swimming in empty space.
+  figma.showUI(UI_HTML, { width: 400, height: 720, themeColors: true });
 
   const stored = (await figma.clientStorage.getAsync('varcat.ui.size')) as
     | { w: number; h: number }
