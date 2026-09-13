@@ -91,11 +91,9 @@
       .vc-row--tight {
         gap: var(--gap-inside, 4px);
       }
+      /* Zero basis, not auto: Spiral's field shells are `width: 100%`, which in
+         a wrapping row would claim the whole line and push siblings down. */
       .vc-grow {
-        flex: 1 1 auto;
-        min-width: 0;
-      }
-      .vc-equal {
         flex: 1 1 0;
         min-width: 0;
       }

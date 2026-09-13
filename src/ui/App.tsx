@@ -456,17 +456,29 @@ export function App() {
       {view === 'wizard' ? (
         <div className="vc-rail">
           <Steps direction="horizontal">
-            {STEPS.map((entry, index) => (
-              <StepsItem
-                key={entry.label}
-                className="vc-step"
-                index={index + 1}
-                state={stepState(index)}
-                title={entry.label}
-                data-clickable={index + 1 <= Math.max(maxStep, step)}
-                onClick={() => gotoStep(index + 1)}
-              />
-            ))}
+            {STEPS.map((entry, index) => {
+              const reachable = index + 1 <= Math.max(maxStep, step);
+              return (
+                <StepsItem
+                  key={entry.label}
+                  className="vc-step"
+                  index={index + 1}
+                  state={stepState(index)}
+                  title={entry.label}
+                  role="button"
+                  tabIndex={reachable ? 0 : -1}
+                  aria-disabled={!reachable}
+                  aria-current={index + 1 === step ? 'step' : undefined}
+                  data-clickable={reachable}
+                  onClick={() => gotoStep(index + 1)}
+                  onKeyDown={(event) => {
+                    if (event.key !== 'Enter' && event.key !== ' ') return;
+                    event.preventDefault();
+                    gotoStep(index + 1);
+                  }}
+                />
+              );
+            })}
           </Steps>
         </div>
       ) : null}
@@ -1036,7 +1048,7 @@ function PreviewStep({
             leading="none"
             itemType="switch"
             title="未填空壳不发布到团队库"
-            subtitle="Figma 的 hiddenFromPublishing，填好值后可自行取消。"
+            subtitle="填好值后可在 Figma 里自行取消。"
             switchProps={{ checked: hiddenFromPublishing, onCheckedChange: onHiddenChange }}
           />
         </ListGroup>
@@ -1141,53 +1153,73 @@ function AdvancedPanel({
         description="原一键生成器：为整个命名空间写入预设值，也是种子色阶的唯一入口。模板流程通常不需要。"
       />
 
-      <Fieldset title="命名空间" description="勾选要展开的集合。">
-        <Stack gap="inside" direction="column">
-          {namespaces.map((namespace) => (
-            <CheckboxInput
-              key={namespace.key}
-              title={namespace.key}
-              description={`${namespace.shape} · ${namespace.valueKind} · ${namespace.modes.join('/')}`}
-              checked={!!nsChecked[namespace.key]}
-              onCheckedChange={(value) =>
-                setNsChecked((prev) => ({ ...prev, [namespace.key]: value === true }))
-              }
-            />
-          ))}
-          <div className="vc-row">
-            <Switch
-              id="all-effects"
-              checked={allEffects}
-              size="small"
-              onCheckedChange={setAllEffects}
-            />
-            <Label htmlFor="all-effects">展开全部合法特效路径</Label>
-          </div>
-        </Stack>
-      </Fieldset>
-
-      <Fieldset title="色阶种子" description="留空则用内置默认色。">
-        <div className="vc-grid">
-          {Object.entries(seeds).map(([family, value]) => (
-            <Stack key={family} gap="inside" direction="column">
-              <Label htmlFor={`seed-${family}`}>{family}</Label>
-              <Input
-                id={`seed-${family}`}
-                value={value}
-                fullWidth
-                onChange={(event) => setSeeds((prev) => ({ ...prev, [family]: event.target.value }))}
-              />
+      {/* Same Card shape as the axis step, so both screens read as one panel. */}
+      <Card>
+        <CardHead
+          icon={false}
+          title="命名空间"
+          description="勾选要展开的集合。"
+          trailing={
+            <Badge style="theme" level="caption" primary={chosen.length > 0}>
+              {chosen.length}
+            </Badge>
+          }
+        />
+        <CardBody>
+          <Fieldset className="vc-grow">
+            <Stack gap="component" direction="column">
+              {namespaces.map((namespace) => (
+                <CheckboxInput
+                  key={namespace.key}
+                  title={namespace.key}
+                  description={`${namespace.shape} · ${namespace.valueKind} · ${namespace.modes.join('/')}`}
+                  checked={!!nsChecked[namespace.key]}
+                  onCheckedChange={(value) =>
+                    setNsChecked((prev) => ({ ...prev, [namespace.key]: value === true }))
+                  }
+                />
+              ))}
+              <div className="vc-row">
+                <Switch
+                  id="all-effects"
+                  checked={allEffects}
+                  size="small"
+                  onCheckedChange={setAllEffects}
+                />
+                <Label htmlFor="all-effects">展开全部合法特效路径</Label>
+              </div>
             </Stack>
-          ))}
-        </div>
-      </Fieldset>
+          </Fieldset>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHead icon={false} title="色阶种子" description="留空则用内置默认色。" />
+        <CardBody>
+          <div className="vc-grid vc-grow">
+            {Object.entries(seeds).map(([family, value]) => (
+              <Stack key={family} gap="inside" direction="column">
+                <Label htmlFor={`seed-${family}`}>{family}</Label>
+                <Input
+                  id={`seed-${family}`}
+                  value={value}
+                  fullWidth
+                  onChange={(event) =>
+                    setSeeds((prev) => ({ ...prev, [family]: event.target.value }))
+                  }
+                />
+              </Stack>
+            ))}
+          </div>
+        </CardBody>
+      </Card>
 
       <Stack gap="component" direction="column">
         <div className="vc-row">
           <Button
             mode="outline"
             size="regular"
-            className="vc-equal"
+            className="vc-grow"
             onClick={() =>
               post({
                 type: 'fullDryRun',
@@ -1202,7 +1234,7 @@ function AdvancedPanel({
           <Button
             mode="destructive"
             size="regular"
-            className="vc-equal"
+            className="vc-grow"
             onClick={() => {
               if (chosen.length === 0) {
                 onError('高级区未选命名空间。');
