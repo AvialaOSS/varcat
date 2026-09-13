@@ -48,10 +48,19 @@ const buildOnce = async () => {
   const uiJs = uiResult.outputFiles.find((file) => file.path.endsWith('ui.js'))?.text ?? '';
   await fs.writeFile(path.join(distDir, 'ui.js'), uiJs, 'utf8');
 
+  // Must use function replacers — String.replace treats `$&` / `$1` in the
+  // replacement as backrefs, and React's production bundle contains `$&/`
+  // which would otherwise inject `</script>` into the HTML and dump the
+  // rest of the bundle as visible page text.
+  const inlineCss = spiralCss.replace(/<\/style/gi, '<\\/style');
+  const inlineJs = uiJs
+    .replace(/<\/script/gi, '<\\/script')
+    .replace(/<!--/g, '<\\!--');
+
   const template = await fs.readFile(path.join(srcDir, 'ui', 'ui.html'), 'utf8');
   const uiHtml = template
-    .replace('/* __SPIRAL_CSS__ */', spiralCss.replace(/<\/style>/gi, '<\\/style>'))
-    .replace('<script src="ui.js"></script>', `<script>${uiJs}</script>`);
+    .replace('/* __SPIRAL_CSS__ */', () => inlineCss)
+    .replace('<script src="ui.js"></script>', () => `<script>${inlineJs}</script>`);
   await fs.writeFile(path.join(distDir, 'ui.html'), uiHtml, 'utf8');
 
   await build({
