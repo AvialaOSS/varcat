@@ -35,14 +35,57 @@ export const findVariable = async (
   );
 };
 
+/**
+ * One read of the file's variables, keyed by `${collectionId}/${name}`. Without
+ * it every upsert re-scans every local variable, which is what made a full run
+ * quadratic and made the plugin look hung.
+ */
+export type VariableIndex = Map<string, Variable>;
+
+const indexKey = (collectionId: string, path: string) => `${collectionId}/${path}`;
+
+export const buildVariableIndex = async (): Promise<VariableIndex> => {
+  const variables = await figma.variables.getLocalVariablesAsync();
+  const index: VariableIndex = new Map();
+  for (const variable of variables) {
+    index.set(indexKey(variable.variableCollectionId, variable.name), variable);
+  }
+  return index;
+};
+
+export const lookupVariable = (
+  index: VariableIndex,
+  collectionId: string,
+  path: string
+): Variable | null => index.get(indexKey(collectionId, path)) ?? null;
+
 export const upsertVariable = async (
   collection: VariableCollection,
   path: string,
-  valueType: VariableResolvedDataType
+  valueType: VariableResolvedDataType,
+  index?: VariableIndex
 ): Promise<UpsertResult> => {
-  const existing = await findVariable(collection, path, valueType);
+  const existing = index
+    ? lookupVariable(index, collection.id, path)
+    : await findVariable(collection, path, valueType);
   if (existing) return { variable: existing, created: false };
-  return { variable: figma.variables.createVariable(path, collection, valueType), created: true };
+  const variable = figma.variables.createVariable(path, collection, valueType);
+  index?.set(indexKey(collection.id, path), variable);
+  return { variable, created: true };
+};
+
+/**
+ * Marks a freshly created empty shell. `description` is the only writable field
+ * that survives a reload and is searchable in the Variables panel, so it is how
+ * an unfilled variable stays findable without painting a sentinel color.
+ */
+export const markUnbound = (
+  variable: Variable,
+  note: string | undefined,
+  hiddenFromPublishing: boolean
+): void => {
+  if (note) variable.description = note;
+  if (hiddenFromPublishing) variable.hiddenFromPublishing = true;
 };
 
 export const setLiteral = (

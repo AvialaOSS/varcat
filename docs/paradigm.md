@@ -4,9 +4,9 @@ Human-readable companion to [`paradigm/vocabulary.json`](../paradigm/vocabulary.
 
 ## Why
 
-Aviala Design's Figma Variables grew organically. The exported ALD collections carry three different casings, plural and singular forms side by side, leaves that repeat their own group (`border/border-fail-primary`), names with spaces (`border-radius-extra-small 2`) and two vocabularies for the same idea (`fail` vs `error`, `infomation` vs `info`). Nothing could be generated, validated or diffed.
+The Figma Variables this replaces grew organically. The exported legacy collections carry three different casings, plural and singular forms side by side, leaves that repeat their own group (`border/border-fail-primary`), names with spaces (`border-radius-extra-small 2`) and two vocabularies for the same idea (`fail` vs `error`, `infomation` vs `info`). Nothing could be generated, validated or diffed.
 
-VarCat replaces that with one closed vocabulary per slot, five namespaces and a validator, so a variable name is either derivable from the paradigm or it is a violation.
+VarCat replaces that with one closed vocabulary per slot, five namespaces and a validator, so a variable name is either derivable from the paradigm or it is a violation. Component names and variant words come from [Spiral](https://github.com/AvialaOSS/developer-kit), so a `component` path lines up with a real component prop rather than a generic word list.
 
 ## Global naming rules
 
@@ -106,15 +106,34 @@ Values: [`density.json`](../paradigm/scales/density.json), [`contrast.json`](../
 
 ### component
 
-`type` ∈ `button` `input` `checkbox` `radio` `switch` `select` `tag` `tab` `link` `badge` `toast` `dialog` `menu` `card` `tooltip` `progress` `slider` `avatar` `divider` `icon`
+`type` is the Spiral component slug — all 44 of them, derived from
+[`paradigm/spiral-catalog.json`](../paradigm/spiral-catalog.json) rather than hand-written. The Figma
+group is always `{type}`, which is what keeps rule 4 satisfied.
+
+**The leaf shape belongs to the template, not to this namespace.** A component template declares its
+own `shape` with two to four slots, and its own closed axis vocabulary. Spiral's Button has one
+appearance axis (`mode`) and Spiral's Input has none, so a fixed four-slot shape would have forced
+words like `filled-primary-…` that exist nowhere in Spiral. See
+[the template model](#template-model) below.
+
+The four-slot shape and the vocabulary under it are the **advanced flow's** shape, kept for the
+complete-paradigm generator and its regression snapshot:
+
 `component` (the variant) ∈ `filled` `outlined` `ghost` `soft` `text`
 `level` ∈ `primary` `secondary` `tertiary` `danger` `success` `neutral`
 `role` ∈ `background` `foreground` `border` `icon` `label` `focusRing`
 `state` ∈ `rest` `hover` `active` `focus` `disabled` `loading` `selected` `checked`
 
-The cross product is 20 × 5 × 6 × 6 × 8 = 28 800 paths, which is not a design system. Only the whitelist in [`paradigm/matrices/component.json`](../paradigm/matrices/component.json) is created: 344 entries covering `button`, `input`, `checkbox`, `switch`, `link` and `tag`. The remaining types keep their vocabulary reserved — a path like `avatar/filled-primary-background-rest` is vocabulary-legal but reported as `notWhitelisted` until a recipe exists.
+For that flow the cross product is 44 × 5 × 6 × 6 × 8 = 63 360 paths, which is not a design system.
+Only the whitelist in [`paradigm/matrices/component.json`](../paradigm/matrices/component.json) is
+created: 344 entries covering `button`, `input`, `checkbox`, `switch`, `link` and `tag`. The remaining
+types keep their vocabulary reserved — a path like `avatar/filled-primary-background-rest` is
+vocabulary-legal but reported as `notWhitelisted` until a recipe exists.
 
-The Figma group is `{type}` and the leaf is the other four slots, which is what keeps rule 4 satisfied.
+Five type words the namespace used to carry do not exist in Spiral: `dialog` (→ `modal`), `menu`
+(→ `navigation`), `toast` (→ `feedback`), `divider` and `icon` (a foundation, not a component). They
+live in `retiredTypes` and the validator reports them as `retiredType` with the replacement. It never
+renames a variable — renaming breaks the bindings a designer already made.
 
 Each whitelist entry carries its semantic alias, derived from `role` → `use`, `level` → `tone` and `(variant, state)` → `slot`:
 
@@ -135,6 +154,42 @@ The group is literally `effect`, so the leaf carries `{name}-{position}` and nev
 
 Default enabled set (from ALD's five `special-effort` tokens plus `softLight-all`): `glow-top`, `glow-bottom`, `lineShadow-bottom`, `lineShadow-bottomDeep`, `lineShadow-all`, `softLight-all`. The Dry-run/Apply UI can expand every legal pair (16) on request.
 
+## Template model
+
+The rules above are namespace-level. A **template** is the unit a user selects, and it narrows the
+closed vocabulary from the global slot lists to its own axes. Registry and files:
+[`paradigm/templates/`](../paradigm/templates).
+
+| Field | Meaning |
+|---|---|
+| `group` | The Figma group segment. For a component template it is the Spiral slug. |
+| `shape` | The leaf, e.g. `{variant}-{role}-{state}`. Two to four slots are legal. |
+| `axes[]` | One per shape slot: `slot`, `values` (the closed list), `default` (what arrives ticked). |
+| `exclude[]` | Combos to drop, each with the `why`. `{ role: ["gloss"], state: ["disabled"] }` drops every gloss × disabled pair. |
+| `extras[]` | Single-point tokens outside the cross product, and the only place a `FLOAT` appears in a component template. |
+
+Slot order is fixed as **appearance → part → state**, so the same token sorts the same way no matter
+who generated it and the Figma group tree stays stable.
+
+Rule 2 applies inside a slot as usual: `focusRing`, `noBackground`, `minWidth`, `onColor` — never
+`focus-ring`. Rule 6 becomes *per template*: a word outside the template's axes is reported as
+`notInTemplate`, even when it is legal in another namespace. `button/filled-background-rest` fails
+that way, because Spiral's Button has no `filled` mode.
+
+### Unbound entries
+
+`PlanEntry.kind` has three values: `literal`, `alias` and `unbound`. An unbound entry carries a path
+and a type and nothing else — Apply calls `createVariable` and never `setValueForMode`.
+
+Figma has no null variable value: `VariableValue` has no `null` member, there is no
+`removeValueForMode`, and `valuesByMode` is read-only. So a created variable always holds *something*
+per mode, and what it holds is Figma's initial value (`COLOR` → opaque black, `FLOAT` → `0`, `STRING`
+→ empty, `BOOLEAN` → `false`). "Unbound" is therefore a convention plus a marker, not an API state.
+
+The marker is `Variable.description`, stamped `VarCat: 待填 · {template id} · {YYYY-MM}`, plus
+`hiddenFromPublishing` so an unfilled shell does not reach the team library. Not writing a value is a
+normal result and lands in `ApplySummary.unbound`, never in `skipped`.
+
 ## Validation
 
 `src/paradigm/validate.ts` is pure — no Figma API, no IO — so the plugin, the dry-run CLI and vitest all agree. It reports issues by code:
@@ -150,9 +205,134 @@ Default enabled set (from ALD's five `special-effort` tokens plus `softLight-all
 | `slotCount` | wrong number of leaf slots for the namespace (also what rule 7 violations look like) |
 | `unknownSlotValue` | rule 6, value is in no closed list |
 | `matrixViolation` | rule 6, value is legal elsewhere but not for this key |
-| `notWhitelisted` | `component` path outside the matrix |
+| `notWhitelisted` | `component` path outside the legacy matrix (advanced flow only) |
+| `notInTemplate` | rule 6 at template scope: the word is not in this template's axis |
+| `retiredType` | a component type VarCat used to accept and Spiral does not have |
 | `unknownNamespace` | no namespace owns this group and slot count |
 
-`validateVariablePath` classifies a path when no collection is given, which is what the plugin's **Validate selection** report uses on an existing file. The three scale collections and the two effect collections are the same shape by design, so classification can only name the group they belong to; pass the namespace explicitly when the collection is known.
+`validateVariablePath` classifies a path when no collection is given, which is what the plugin's **Check the whole file** report uses on an existing file. The three scale collections and the two effect collections are the same shape by design, so classification can only name the group they belong to; pass the namespace explicitly when the collection is known.
 
 Gold and anti examples for every rule live in [`tests/validate.test.ts`](../tests/validate.test.ts).
+
+## Legacy name mapping
+
+Historical reference, moved here from the README. The Aviala Design (ALD) collections a Figma file
+may still carry keep working: VarCat never reads or writes them, it only ever writes the eight
+lowercase collection names above. Nothing below is a rename in place — this is the migration key for
+a designer moving a layer over by hand.
+
+### Collections
+
+| ALD today | VarCat |
+|-----------|--------|
+| `Aviala Design Colors` (Light/Dark) | `palette` (light/dark) |
+| `token-colors` (Default) | `semantic` (light/dark) |
+| `base-numbers` (Default / Mobile Friendly) | `scaleStatic` / `scaleDensity`, plus the new `scaleContrast` |
+| `font-weight` (Mode 1) | folded into `scale*` as `weight/{step}` |
+| `special-effort` (ON/OFF) | `effect` (light/dark) + `effectSwitch` (on/off) |
+| `base-variable` (empty) | dropped |
+| — | `component` (new) |
+
+### Palette
+
+| ALD | VarCat |
+|-----|--------|
+| `primary/primary-8` | `primary/s8` |
+| `error/error-8` | `error/s8` |
+| `neutral/neutral-14` | `neutral/s14` |
+
+The step number is written `sN` so the segment starts with a letter. Display names still read as step 8.
+
+### Semantic — text
+
+| ALD | VarCat |
+|-----|--------|
+| `text/text-theme-primary-black` | `text/theme-primary` |
+| `text/text-theme-secondary-black` | `text/theme-secondary` |
+| `text/text-theme-light-black` | `text/theme-tertiary` |
+| `text/text-fail-primary-black` | `text/error-primary` |
+| `text/text-infomation-primary-black` | `text/info-primary` |
+| `text/text-normal-title-black` | `text/normal-title` |
+| `text/text-normal-text-black` | `text/normal-primary` |
+| `text/text-normal-text-caption-black` | `text/normal-caption` |
+| `text/text-normal-{title,text,text-caption}-white` | `text/normal-inverse` |
+
+`success` and `warning` follow the `theme` rows. The `-black` / `-white` suffixes disappear: the palette collection already flips per mode, so one variable covers both. Text on a filled brand surface is `text/{tone}-onColor`, which is the only alias that differs per mode.
+
+### Semantic — box
+
+| ALD | VarCat |
+|-----|--------|
+| `box/box-theme-primaryBackground` | `box/theme-primary` |
+| `box/box-theme-secondaryBackground` | `box/theme-secondary` |
+| `box/box-theme-lightBackground` | `box/theme-soft` |
+| `box/box-fail-primaryBackground` | `box/error-primary` |
+| `box/box-infomation-lightBackground` | `box/info-soft` |
+| `box/box-normal-lightBackground-black` | `box/normal-soft` |
+| `box/box-normal-lightBackground-white` | `box/normal-canvas` |
+| `box/box-normal-Background-blackOnly` | `box/normal-inverse` |
+| `box/box-normal-Background-whiteOnly` | `box/normal-canvas` |
+| `normal-background-theme` (root leaf) | `box/normal-primary` |
+
+### Semantic — border
+
+| ALD | VarCat |
+|-----|--------|
+| `border/border-theme-primary` | `border/theme-primary` |
+| `border/border-fail-primary` | `border/error-primary` |
+| `border/border-infomation-primary` | `border/info-primary` |
+| `border/border-normal-1` | `border/normal-soft` |
+| `border/border-normal-2` | `border/normal-tertiary` |
+| `border/border-normal-3` | `border/normal-primary` |
+| — | `border/{tone}-focus` (new; focus rings were not variables) |
+
+### Semantic — control
+
+| ALD | VarCat |
+|-----|--------|
+| `control/control-theme-Background` | `control/theme-primary` |
+| `control/control-theme-lightBackground` | `control/theme-soft` |
+| `control/control-fail-Background` | `control/error-primary` |
+| `control/control-normal-Background-whiteOnly` | `control/normal-canvas` |
+| `control/control-normal-Background-blackOnly` | `control/normal-inverse` |
+| `control/control-normal-lightBackground-1` | `control/normal-soft` |
+| `control/control-normal-lightBackground-2` | `control/normal-muted` |
+| `control/control-normal-Background-3` | `control/normal-primary` |
+
+All eight rows keep their ALD palette step, so the resolved colors do not move.
+
+### Scale
+
+| ALD | VarCat |
+|-----|--------|
+| `size/size-tiny\|small\|regular\|middle\|big` | `size/xs\|sm\|md\|lg\|xl` |
+| `size/size-semilarge\|semilarger` | `size/xxl` |
+| `size/size-large\|huge` | `size/xxxl` |
+| `size/size-max` | `size/max` |
+| `gap/gap-inside\|inside-space\|component-space` | `gap/xs\|sm\|md` |
+| `gap/gap-content-space\|block-space\|chapter-space\|page-space` | `gap/lg\|xl\|xxl\|xxxl` |
+| `padding/padding-min\|tiny\|default\|middle` | `padding/xs\|sm\|md\|lg` |
+| `padding/padding-big\|large\|max` | `padding/xl\|xxl\|max` |
+| `border-radius/border-radius-extra-small 2` | `radius/sm` |
+| `border-radius/border-radius-small\|middle\|big\|large` | `radius/md\|lg\|xl\|xxl` |
+| `border-radius/border-radius-allround` | `radius/max` |
+| `border-thickness/border-thickness-default\|middle\|large` | `thickness/xs\|sm\|md` |
+| `line-height/line-height-tiny\|small\|regular\|middle` | `lineHeight/xs\|sm\|md\|lg` |
+| `line-height/line-height-big\|semilarge\|large` | `lineHeight/xxl\|xxxl\|max` |
+| `transparency/transparency-loading\|disable\|placeholder` | `transparency/loading\|disabled\|placeholder` |
+| `font-weight/{light…bold}` | `weight/{light…bold}` |
+
+The ladders collapse to nine steps, so a few ALD rungs have no successor: `padding-tinyer\|smaller\|small\|littleSmall` (3/5/6/7), `size-huger` (34), `line-height-huge\|max` (52/44). Pick the nearest new step when migrating a layer, or add the value to the scale JSON if the rung is load-bearing.
+
+### Effects
+
+| ALD | VarCat |
+|-----|--------|
+| `special-effort/se-light-effort-top` | `effect/glow-top` |
+| `special-effort/se-light-effort-bottom` | `effect/glow-bottom` |
+| `special-effort/se-lineShadow-bottom` | `effect/lineShadow-bottom` |
+| `special-effort/se-lineShadow-bottomDeep` | `effect/lineShadow-bottomDeep` |
+| `special-effort/se-lineShadow-all` | `effect/lineShadow-all` |
+| — | `effect/softLight-all` (new) |
+
+The ALD ON/OFF modes become the `effectSwitch` collection; `effect` keeps the same paths and switches by theme instead.

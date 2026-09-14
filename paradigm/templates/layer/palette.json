@@ -1,0 +1,9 @@
+{
+  "id": "layer.palette",
+  "kind": "layer",
+  "namespace": "palette",
+  "label": "Palette",
+  "labelZh": "色阶",
+  "summary": "Six color families, 12 chromatic steps and 14 neutral steps.",
+  "summaryZh": "六个色族，彩色 12 级、中性 14 级。"
+}

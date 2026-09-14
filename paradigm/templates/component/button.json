@@ -1,0 +1,81 @@
+{
+  "id": "spiral.button",
+  "kind": "component",
+  "spiral": {
+    "displayName": "Button",
+    "group": "Basic Input",
+    "source": "packages/ui/src/components/button.tsx",
+    "variantProp": "mode",
+    "cssReference": "packages/tokens/src/semantic/button-effects.css"
+  },
+  "collection": "component",
+  "modes": ["light", "dark"],
+  "group": "button",
+  "shape": "{variant}-{role}-{state}",
+  "valueType": "COLOR",
+  "axes": [
+    {
+      "slot": "variant",
+      "label": "Appearance",
+      "labelZh": "外观",
+      "note": "Plan closed vocabulary for the appearance slot (curated template JSON).",
+      "values": [
+        "primary",
+        "second",
+        "default",
+        "defaultCustom",
+        "noBackground",
+        "noBackgroundCustom",
+        "outline",
+        "outlineCustom",
+        "destructive"
+      ],
+      "default": ["primary", "destructive"]
+    },
+    {
+      "slot": "role",
+      "label": "Part",
+      "labelZh": "部位",
+      "values": ["background", "foreground", "border", "icon", "focusRing", "gloss"],
+      "default": ["background", "foreground"]
+    },
+    {
+      "slot": "state",
+      "label": "State",
+      "labelZh": "状态",
+      "values": ["rest", "hover", "active", "focus", "disabled", "loading"],
+      "default": ["rest", "hover", "active"]
+    }
+  ],
+  "exclude": [
+    { "why": "the gloss overlay is hidden while the button is inert", "role": ["gloss"], "state": ["disabled", "loading"] },
+    { "why": "a focus ring only exists in the focus state", "role": ["focusRing"], "state": ["rest", "hover", "active", "disabled", "loading"] },
+    { "why": "the borderless modes draw no border", "variant": ["noBackground", "noBackgroundCustom", "default", "defaultCustom"], "role": ["border"] },
+    { "why": "only a filled surface carries a gloss", "variant": ["outline", "outlineCustom", "noBackground", "noBackgroundCustom"], "role": ["gloss"] }
+  ],
+  "extras": [
+    { "path": "button/disabled-opacity", "valueType": "FLOAT", "note": "--button-disabled-opacity" },
+    { "path": "button/minWidth", "valueType": "FLOAT", "note": "--button-min-width" },
+    { "path": "button/minWidth-allRound", "valueType": "FLOAT", "note": "--button-min-width-allround" },
+    { "path": "button/tiny-height", "valueType": "FLOAT" },
+    { "path": "button/tiny-paddingX", "valueType": "FLOAT" },
+    { "path": "button/tiny-paddingY", "valueType": "FLOAT" },
+    { "path": "button/tiny-radius", "valueType": "FLOAT" },
+    { "path": "button/tiny-iconSize", "valueType": "FLOAT" },
+    { "path": "button/small-height", "valueType": "FLOAT" },
+    { "path": "button/small-paddingX", "valueType": "FLOAT" },
+    { "path": "button/small-paddingY", "valueType": "FLOAT" },
+    { "path": "button/small-radius", "valueType": "FLOAT" },
+    { "path": "button/small-iconSize", "valueType": "FLOAT" },
+    { "path": "button/regular-height", "valueType": "FLOAT" },
+    { "path": "button/regular-paddingX", "valueType": "FLOAT" },
+    { "path": "button/regular-paddingY", "valueType": "FLOAT" },
+    { "path": "button/regular-radius", "valueType": "FLOAT" },
+    { "path": "button/regular-iconSize", "valueType": "FLOAT" },
+    { "path": "button/big-height", "valueType": "FLOAT" },
+    { "path": "button/big-paddingX", "valueType": "FLOAT" },
+    { "path": "button/big-paddingY", "valueType": "FLOAT" },
+    { "path": "button/big-radius", "valueType": "FLOAT" },
+    { "path": "button/big-iconSize", "valueType": "FLOAT" }
+  ]
+}

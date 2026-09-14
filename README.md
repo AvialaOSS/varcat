@@ -1,175 +1,244 @@
 # VarCat
 
-Figma plugin that creates the whole Aviala Design Variables tree from one closed naming paradigm: five namespaces, eight collections, 757 variables, all derivable from [`paradigm/vocabulary.json`](paradigm/vocabulary.json).
+Figma plugin that creates **Spiral-named Figma Variables as empty shells**. You pick templates, tick
+the axes you want, review the exact path list, then Apply creates each variable with a path and a
+type — and stops. No mode value is written, because the value is yours to fill.
 
-Sibling of [ColorCat](https://github.com/AvialaOSS/colorcat), which stays responsible for color-ramp experiments. VarCat reuses ColorCat's ramp algorithm (`@aviala-design/color`) but owns naming, aliasing and bulk creation.
+Component names, appearance words and part names come from
+[Spiral](https://github.com/AvialaOSS/developer-kit), the Aviala Design component library, so a
+variable path lines up with a real component prop instead of a generic word list.
 
-## Install
+**This is not [ColorCat](https://github.com/AvialaOSS/colorcat).** ColorCat generates color ramps and
+writes real colors. VarCat owns naming and bulk creation, and by default writes no color at all. If
+the plugin window says ColorCat or shows 搜索颜色 / 添加颜色, you imported the wrong manifest.
+
+## Install — the build step is not optional
+
+`dist/` is gitignored, and `manifest.json` points at `dist/code.js`. A fresh clone has no bundle, so
+importing the manifest before building is a hard load failure that looks like "the plugin does
+nothing".
 
 ```bash
 npm install
-npm run build
+npm run build          # writes dist/code.js + dist/ui.html — REQUIRED
 ```
 
-Then in Figma desktop: **Plugins → Development → Import plugin from manifest…** and pick `manifest.json` from this folder. `npm run watch` rebuilds on save; re-run the plugin to pick up a change.
+Then in Figma **desktop**: **Plugins → Development → Import plugin from manifest…** and pick
+`manifest.json` from this folder. `npm run watch` rebuilds on save; re-run the plugin to pick up a
+change.
 
 | Script | What it does |
 |--------|--------------|
 | `npm run build` | Bundles `dist/code.js` + `dist/ui.html` (esbuild) |
 | `npm run watch` | Same, in watch mode |
-| `npm test` | vitest: validator gold/anti examples + expansion snapshot |
+| `npm test` | vitest: validator gold/anti examples, template expansion, unbound apply |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run dry-run` | Headless expansion; `-- --json` prints the full path inventory |
-| `npm run paradigm:generate` | Regenerates the derived alias table and component matrix |
+| `npm run dry-run` | Headless expansion — see [Dry-run without Figma](#dry-run-without-figma) |
+| `npm run spiral:catalog` | Regenerates `paradigm/spiral-catalog.json` from a Spiral checkout |
+| `npm run paradigm:generate` | Regenerates the derived alias table and the legacy component matrix |
 
 ## Using the plugin
 
-1. **Namespaces** — check the collections to write. All eight are on by default.
-2. **Palette seeds** — the ALD seeds are prefilled (`primary #FF5532`, `success #33BF24`, `warning #FFC130`, `error #FF1D4E`, `info #37B2FF`). The neutral ramp is the ALD literal ramp.
-3. **Dry-run** — counts per collection plus the first paths, nothing is written.
-4. **Apply** — creates or reuses collections and modes, then upserts every variable by path. Re-running is idempotent: existing variables are updated in place, and variables you added by hand are never deleted.
-5. **Validate selection** — checks every local variable in the file against the paradigm and lists the violations with the rule that fired.
+Four steps, one screen each, every step returns to the previous one.
 
-Apply writes into a **new `palette` collection**. The existing `Aviala Design Colors` collection is never touched or overwritten; the mapping below is how the two relate.
+1. **Templates** — two sections: the seven foundation layers (`palette`, `semantic`, the three
+   scales, the two effect collections) and the 44 Spiral components grouped the way Storybook groups
+   them. **Nothing is selected by default**, and Apply stays disabled until something is. Each row
+   shows how many variables it would add.
+2. **Axes** — for a component template, tick values on the appearance / part / state axes. The count
+   updates live (`2 × 2 × 3 = 12`). Above 200 you get a warning, above 500 Apply asks again — the
+   full cross product of a rich component runs into the hundreds and is almost never what you want.
+   `Select all` / `Clear` / `Reset` are there per template. A template's `extras` — the single-point
+   `FLOAT` tokens like `button/disabled-opacity` — are a separate opt-in.
+3. **Dry-run** — the complete path list grouped by collection, filterable and copyable, each path
+   marked `+` (will be created) or `·` (already exists, left alone). Apply is disabled while the plan
+   has a paradigm violation. A collection that needs two modes on a file whose Figma plan allows one
+   is called out here, before you write anything.
+4. **Apply** — batched, with a progress bar, and it finishes with the list of variables that are now
+   empty shells, grouped by collection and ready to copy.
 
-Namespaces are applied in dependency order (`palette` → `semantic` → `component`) so aliases always find their target. If you apply `component` alone, VarCat looks the target up in the file and reports the entry as skipped rather than writing a literal behind your back.
+### What "empty shell" actually means
+
+Figma has no null variable value. `VariableValue` is
+`boolean | string | number | RGB | RGBA | VariableAlias` — there is no `null` in it, there is no
+`removeValueForMode`, and `valuesByMode` is read-only. Once a variable exists, every mode holds
+*something*.
+
+So VarCat does the only honest version of "unbound": it creates the variable and never calls
+`setValueForMode`. Each mode then holds **Figma's own initial value**, which is:
+
+| Type | Initial value Figma assigns |
+|------|-----------------------------|
+| `COLOR` | opaque black |
+| `FLOAT` | `0` |
+| `STRING` | empty string |
+| `BOOLEAN` | `false` |
+
+That is a real value, not a blank. To keep an unfilled shell distinguishable from a deliberate black,
+each one is marked in two writable places:
+
+- `Variable.description` is stamped `VarCat: 待填 · {template id} · {YYYY-MM}`, so unfilled variables
+  are searchable in the Variables panel and countable by **Check the whole file**.
+- `hiddenFromPublishing` is set (on by default, one toggle in the UI), so an unfilled shell does not
+  reach the team library before it has a value.
+
+VarCat does **not** paint a sentinel color. A magenta placeholder that escapes into a design file is
+worse than a black one.
+
+Re-running Apply never overwrites a value you filled in. An existing path is reported as existing and
+skipped entirely — its `valuesByMode` and its description are left alone.
+
+### Advanced: the complete paradigm with preset values
+
+The original one-shot generator is still there, in a collapsed section, with nothing checked. It
+writes all 757 variables with real values and aliases, and it is the only way to seed the palette
+ramps from the five seed colors. It asks for confirmation before writing.
+
+It is also the regression baseline for the expansion snapshot, which is why it is demoted rather than
+deleted.
+
+**Check the whole file** (formerly the misnamed "Validate selection") validates every local variable
+against the paradigm and reports both violations and how many variables are still marked unfilled.
+
+## Dry-run without Figma
+
+```bash
+npm run dry-run -- --template list                              # every selectable template
+npm run dry-run -- --template spiral.button --paths             # default axes → 12 paths
+npm run dry-run -- --template spiral.button --axes-all --extras # full cross product
+npm run dry-run -- --template spiral.button,spiral.tab --json
+npm run dry-run -- --namespaces palette,semantic --paths        # the advanced full paradigm
+```
+
+## Templates
+
+A template is a slice of the paradigm you opt into. The data lives in
+[`paradigm/templates/`](paradigm/templates): a registry plus one file per layer and per component.
+
+```json
+{
+  "id": "spiral.button",
+  "group": "button",
+  "shape": "{variant}-{role}-{state}",
+  "axes": [
+    { "slot": "variant", "values": ["primary", "second", "…", "destructive"], "default": ["primary", "destructive"] },
+    { "slot": "role",    "values": ["background", "foreground", "…"],         "default": ["background", "foreground"] },
+    { "slot": "state",   "values": ["rest", "hover", "…"],                    "default": ["rest", "hover", "active"] }
+  ],
+  "exclude": [{ "why": "…", "role": ["gloss"], "state": ["disabled", "loading"] }],
+  "extras": [{ "path": "button/disabled-opacity", "valueType": "FLOAT" }]
+}
+```
+
+Three things to know about the model:
+
+- **The shape belongs to the template, not to the namespace.** The `component` namespace used to hard
+  code four leaf slots (`{component}-{level}-{role}-{state}`). Spiral's Button has one appearance axis
+  and Spiral's Input has none, so a fixed four slots forced invented words like `filled-primary-…`.
+  Templates carry their own shape; two to four slots are all legal.
+- **`exclude` is the whitelist inverted.** The old whitelist was 344 hand-written entries in an 84 KB
+  file. Axes plus a handful of exclude rules say the same thing in a few dozen lines per component,
+  and each rule carries the reason it exists.
+- **`extras` is where the non-cross-product tokens go**, and the only place a `FLOAT` appears in a
+  component template. A Figma collection is happy to mix types; `resolvedType` is per variable.
+
+### Which components are fully templated
+
+Eight components have curated axes taken from their real Spiral variants:
+`button` (`mode`), `switch` (checked/unchecked), `segmentator` (`mode`), `tab` (`style`),
+`badge` (`style`), `tag` (`level`), `alert` (`type`) and `input` (no appearance axis — its cva
+variants are layout only, which is what makes the two-slot shape necessary).
+
+The other 36 catalog components are selectable with generic `role` × `state` axes and no appearance
+axis. Those words (`background` / `foreground` / `border` / `icon`, `rest` / `hover` / `active` /
+`disabled`) are shared by every component, so a stub never invents an appearance word Spiral does not
+use. Curating one means adding a file under `paradigm/templates/component/` with the real variant
+list.
+
+### Naming, in one example
+
+Spiral's private CSS custom properties are the naming reference — **not** the value source. VarCat
+never reads a color out of `@aviala-design/tokens`; the source of truth for a value is Figma.
+
+| Spiral CSS variable | VarCat path | Type |
+|---|---|---|
+| `--button-primary-bg-hover` | `button/primary-background-hover` | `COLOR` |
+| `--button-outline-border` | `button/outline-border-rest` | `COLOR` |
+| `--button-disabled-opacity` | `button/disabled-opacity` *(extras)* | `FLOAT` |
+| `--switch-thumb-bg` | `switch/checked-thumb-background-rest` | `COLOR` |
+| `--tab-indicator-height` | `tab/indicator-height` *(extras)* | `FLOAT` |
+
+## The Spiral catalog
+
+[`paradigm/spiral-catalog.json`](paradigm/spiral-catalog.json) is derived, never hand-written:
+
+```bash
+npm run spiral:catalog -- --spiral /path/to/developer-kit
+npm run spiral:catalog:check          # non-zero exit if the committed file is stale
+```
+
+The script reads `packages/ui/src/components/*.stories.tsx` for the Storybook
+`title: "{group}/{Component}"` — the only listing that carries the design-side grouping — and the
+semantic effect CSS for each component's private property inventory. 44 components across 6 groups;
+`Foundation/Icons` is dropped because icons are a foundation, not a component. It is a **manifest
+only**: no value is ever synced.
+
+The component slug is the display name with a lowercase first letter (`NumberInput` → `numberInput`),
+which satisfies the camelCase slot rule for free.
+
+### Retired component types
+
+Five type words VarCat used to accept do not exist in Spiral. The validator reports them and suggests
+the replacement; it never renames anything, because renaming a variable breaks the bindings a
+designer already made.
+
+| Retired | Spiral |
+|---|---|
+| `dialog` | `modal` |
+| `menu` | `navigation` |
+| `toast` | `feedback` |
+| `divider` | — |
+| `icon` | — (a foundation) |
+
+### `manifest.json` keeps its id
+
+The plugin id is still `varcat-aviala-design`. Changing it makes Figma treat this as a brand new
+plugin: every already-imported development copy stops resolving. The visible name and copy are
+Spiral's; the id is a stable identifier and is left alone deliberately.
 
 ## Paradigm in one screen
 
 Full rules and vocabulary: [`docs/paradigm.md`](docs/paradigm.md).
 
-| Collection | Path shape | Value | Modes | Count |
+| Collection | Path shape | Value | Modes | Count in the full run |
 |------------|------------|-------|-------|-------|
 | `palette` | `{family}/{step}` | literal `COLOR` | `light` / `dark` | 74 |
 | `semantic` | `{use}/{tone}-{slot}` | alias → `palette` | `light` / `dark` | 150 |
 | `scaleStatic` | `{category}/{step}` | literal `FLOAT` | `default` | 59 |
 | `scaleDensity` | `{category}/{step}` | literal `FLOAT` | `default` | 59 |
 | `scaleContrast` | `{category}/{step}` | literal `FLOAT` | `default` | 59 |
-| `component` | `{type}/{component}-{level}-{role}-{state}` | alias → `semantic` | `light` / `dark` | 344 |
+| `component` | template-owned, e.g. `button/{variant}-{role}-{state}` | unbound (template flow) or alias → `semantic` (advanced) | `light` / `dark` | 344 |
 | `effect` | `effect/{name}-{position}` | literal `COLOR` | `light` / `dark` | 6 |
 | `effectSwitch` | `effect/{name}-{position}` | literal `COLOR` | `on` / `off` | 6 |
 
-Naming rules: charset `a-zA-Z0-9-`; every segment and slot starts with a lowercase letter and stays camelCase inside; a group is mandatory; the leaf never repeats the full group name; singular only; `-` separates slots only; every slot draws from a closed list narrowed further by the per-namespace matrices.
+Naming rules: charset `a-zA-Z0-9-`; every segment and slot starts with a lowercase letter and stays
+camelCase inside; a group is mandatory; the leaf never repeats the full group name; singular only;
+`-` separates slots only; every slot draws from a closed list — for a component template, that closed
+list is the template's own axes.
 
-## Old ALD → new name
+### Figma mode limits
 
-The old collections keep working. Nothing below is a rename in place — VarCat writes new collections, and this table is the migration key.
+Five of the eight collections want two modes. On a Figma plan capped at one variable mode per
+collection the second mode cannot be created at all. In the template flow this is easy to miss —
+nothing has values, so a missing `dark` half looks like everything else. VarCat checks the budget in
+the dry-run and reports every refused mode in the Apply summary.
 
-### Collections
+## Migrating from the legacy Aviala Design collections
 
-| ALD today | VarCat |
-|-----------|--------|
-| `Aviala Design Colors` (Light/Dark) | `palette` (light/dark) |
-| `token-colors` (Default) | `semantic` (light/dark) |
-| `base-numbers` (Default / Mobile Friendly) | `scaleStatic` / `scaleDensity`, plus the new `scaleContrast` |
-| `font-weight` (Mode 1) | folded into `scale*` as `weight/{step}` |
-| `special-effort` (ON/OFF) | `effect` (light/dark) + `effectSwitch` (on/off) |
-| `base-variable` (empty) | dropped |
-| — | `component` (new) |
-
-### Palette
-
-| ALD | VarCat |
-|-----|--------|
-| `primary/primary-8` | `primary/s8` |
-| `error/error-8` | `error/s8` |
-| `neutral/neutral-14` | `neutral/s14` |
-
-The step number is written `sN` so the segment starts with a letter. Display names still read as step 8.
-
-### Semantic — text
-
-| ALD | VarCat |
-|-----|--------|
-| `text/text-theme-primary-black` | `text/theme-primary` |
-| `text/text-theme-secondary-black` | `text/theme-secondary` |
-| `text/text-theme-light-black` | `text/theme-tertiary` |
-| `text/text-fail-primary-black` | `text/error-primary` |
-| `text/text-infomation-primary-black` | `text/info-primary` |
-| `text/text-normal-title-black` | `text/normal-title` |
-| `text/text-normal-text-black` | `text/normal-primary` |
-| `text/text-normal-text-caption-black` | `text/normal-caption` |
-| `text/text-normal-{title,text,text-caption}-white` | `text/normal-inverse` |
-
-`success` and `warning` follow the `theme` rows. The `-black` / `-white` suffixes disappear: the palette collection already flips per mode, so one variable covers both. Text on a filled brand surface is `text/{tone}-onColor`, which is the only alias that differs per mode.
-
-### Semantic — box
-
-| ALD | VarCat |
-|-----|--------|
-| `box/box-theme-primaryBackground` | `box/theme-primary` |
-| `box/box-theme-secondaryBackground` | `box/theme-secondary` |
-| `box/box-theme-lightBackground` | `box/theme-soft` |
-| `box/box-fail-primaryBackground` | `box/error-primary` |
-| `box/box-infomation-lightBackground` | `box/info-soft` |
-| `box/box-normal-lightBackground-black` | `box/normal-soft` |
-| `box/box-normal-lightBackground-white` | `box/normal-canvas` |
-| `box/box-normal-Background-blackOnly` | `box/normal-inverse` |
-| `box/box-normal-Background-whiteOnly` | `box/normal-canvas` |
-| `normal-background-theme` (root leaf) | `box/normal-primary` |
-
-### Semantic — border
-
-| ALD | VarCat |
-|-----|--------|
-| `border/border-theme-primary` | `border/theme-primary` |
-| `border/border-fail-primary` | `border/error-primary` |
-| `border/border-infomation-primary` | `border/info-primary` |
-| `border/border-normal-1` | `border/normal-soft` |
-| `border/border-normal-2` | `border/normal-tertiary` |
-| `border/border-normal-3` | `border/normal-primary` |
-| — | `border/{tone}-focus` (new; focus rings were not variables) |
-
-### Semantic — control
-
-| ALD | VarCat |
-|-----|--------|
-| `control/control-theme-Background` | `control/theme-primary` |
-| `control/control-theme-lightBackground` | `control/theme-soft` |
-| `control/control-fail-Background` | `control/error-primary` |
-| `control/control-normal-Background-whiteOnly` | `control/normal-canvas` |
-| `control/control-normal-Background-blackOnly` | `control/normal-inverse` |
-| `control/control-normal-lightBackground-1` | `control/normal-soft` |
-| `control/control-normal-lightBackground-2` | `control/normal-muted` |
-| `control/control-normal-Background-3` | `control/normal-primary` |
-
-All eight rows keep their ALD palette step, so the resolved colors do not move.
-
-### Scale
-
-| ALD | VarCat |
-|-----|--------|
-| `size/size-tiny\|small\|regular\|middle\|big` | `size/xs\|sm\|md\|lg\|xl` |
-| `size/size-semilarge\|semilarger` | `size/xxl` |
-| `size/size-large\|huge` | `size/xxxl` |
-| `size/size-max` | `size/max` |
-| `gap/gap-inside\|inside-space\|component-space` | `gap/xs\|sm\|md` |
-| `gap/gap-content-space\|block-space\|chapter-space\|page-space` | `gap/lg\|xl\|xxl\|xxxl` |
-| `padding/padding-min\|tiny\|default\|middle` | `padding/xs\|sm\|md\|lg` |
-| `padding/padding-big\|large\|max` | `padding/xl\|xxl\|max` |
-| `border-radius/border-radius-extra-small 2` | `radius/sm` |
-| `border-radius/border-radius-small\|middle\|big\|large` | `radius/md\|lg\|xl\|xxl` |
-| `border-radius/border-radius-allround` | `radius/max` |
-| `border-thickness/border-thickness-default\|middle\|large` | `thickness/xs\|sm\|md` |
-| `line-height/line-height-tiny\|small\|regular\|middle` | `lineHeight/xs\|sm\|md\|lg` |
-| `line-height/line-height-big\|semilarge\|large` | `lineHeight/xxl\|xxxl\|max` |
-| `transparency/transparency-loading\|disable\|placeholder` | `transparency/loading\|disabled\|placeholder` |
-| `font-weight/{light…bold}` | `weight/{light…bold}` |
-
-The ladders collapse to nine steps, so a few ALD rungs have no successor: `padding-tinyer\|smaller\|small\|littleSmall` (3/5/6/7), `size-huger` (34), `line-height-huge\|max` (52/44). Pick the nearest new step when migrating a layer, or add the value to the scale JSON if the rung is load-bearing.
-
-### Effects
-
-| ALD | VarCat |
-|-----|--------|
-| `special-effort/se-light-effort-top` | `effect/glow-top` |
-| `special-effort/se-light-effort-bottom` | `effect/glow-bottom` |
-| `special-effort/se-lineShadow-bottom` | `effect/lineShadow-bottom` |
-| `special-effort/se-lineShadow-bottomDeep` | `effect/lineShadow-bottomDeep` |
-| `special-effort/se-lineShadow-all` | `effect/lineShadow-all` |
-| — | `effect/softLight-all` (new) |
-
-The ALD ON/OFF modes become the `effectSwitch` collection; `effect` keeps the same paths and switches by theme instead.
+Historical reference. The old collections (`Aviala Design Colors`, `token-colors`, `base-numbers`,
+`font-weight`, `special-effort`, `base-variable`) are **never read and never touched** — VarCat only
+ever writes the eight lowercase collection names above. The full old-name → new-name key lives in
+[`docs/paradigm.md`](docs/paradigm.md#legacy-name-mapping).
 
 ## Repository layout
 
@@ -177,26 +246,34 @@ The ALD ON/OFF modes become the `effectSwitch` collection; `effect` keeps the sa
 varcat/
 ├── manifest.json            Figma plugin manifest
 ├── paradigm/                source of truth, read by the plugin and the tests
-│   ├── vocabulary.json      rules, namespaces, closed slot lists, matrices
-│   ├── aliases/             semantic → palette alias table
-│   ├── matrices/            component whitelist + its semantic aliases
+│   ├── vocabulary.json      rules, namespaces, closed slot lists, matrices, retired types
+│   ├── spiral-catalog.json  derived from developer-kit; manifest only, no values
+│   ├── templates/           registry + one file per layer and per component
+│   ├── aliases/             semantic → palette alias table (advanced flow)
+│   ├── matrices/            legacy component whitelist (advanced flow)
 │   ├── scales/              density / contrast / static values
 │   └── effects/             effect + effectSwitch literals
 ├── src/
-│   ├── paradigm/            vocabulary loader, pure validator, pure expansion
+│   ├── paradigm/            vocabulary loader, pure validator, pure expansion, templates
 │   ├── palette/             ramp generation via @aviala-design/color
 │   ├── figma/               idempotent collections, path upsert, apply
 │   ├── cli/                 headless dry-run
 │   ├── ui/                  zero-framework UI (one HTML + one TS file)
 │   └── code.ts              plugin entry
-├── scripts/                 build, dry-run, paradigm generation
-├── tests/                   validator gold/anti examples, expansion snapshot
+├── scripts/                 build, dry-run, paradigm generation, Spiral catalog sync
+├── tests/                   validator examples, template expansion, unbound apply
 └── docs/paradigm.md         human-readable paradigm
 ```
 
 ## Adding to the paradigm
 
-1. Edit `paradigm/vocabulary.json` (slot lists, matrices) — never hardcode a name in `src/`.
-2. If the change touches semantic aliases or the component whitelist, edit the rule in `scripts/generate-paradigm.mjs` and run `npm run paradigm:generate`; commit the regenerated JSON so the reviewer sees the expanded table.
-3. Run `npm test`. The expansion snapshot will show every added or removed path.
-4. Update `docs/paradigm.md` and, if it changes a migration, the table above.
+1. **A component template** — add `paradigm/templates/component/{slug}.json`, register it in
+   `paradigm/templates/index.json`, and add the static import in `src/paradigm/templates.ts` (esbuild
+   bundles the JSON, so a glob is not an option). Take the appearance values from the component's
+   real `cva` variant map in Spiral, not from a generic word list. Never hardcode a name in `src/`.
+2. **A slot or a matrix rule** — edit `paradigm/vocabulary.json`.
+3. **A semantic alias or the legacy component whitelist** — edit the rule in
+   `scripts/generate-paradigm.mjs`, run `npm run paradigm:generate`, and commit the regenerated JSON
+   so the reviewer sees the expanded table.
+4. Run `npm test`. Two snapshots will show every added or removed path.
+5. Update `docs/paradigm.md`, and this file if it changes the flow.

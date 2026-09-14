@@ -1,159 +1,156 @@
 <!doctype html>
-<html lang="en">
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
-    <title>VarCat</title>
+    <title>VarCat · Spiral</title>
+    <style id="spiral-styles">/* __SPIRAL_CSS__ */</style>
     <style>
-      :root {
-        color-scheme: light dark;
-        font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-        font-size: 11px;
+      /*
+       * Plugin shell only. Chrome, type and colour come from
+       * @aviala-design/spiral components + styles.css; what is left here is the
+       * fixed-height iframe frame (header / scrolling body / action footer),
+       * the monospace path type Spiral has no scale for, and a few flex
+       * affordances Stack does not expose (wrap, grow, push-to-end).
+       */
+      /* Spiral's dist CSS ships no preflight; without this every padded
+         full-width child overflows the narrow iframe by its own padding. */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
       }
-
+      /* `.vc-root` is ConfigProvider's wrapper (see main.tsx): the shell's
+         `height: 100%` needs an unbroken chain up to the iframe. */
+      html,
+      body,
+      #root,
+      .vc-root {
+        height: 100%;
+        margin: 0;
+      }
       body {
-        margin: 0;
-        padding: 12px;
-        color: var(--figma-color-text);
-        background: var(--figma-color-bg);
+        background: var(--color-background, #f9f8f8);
+        overflow: hidden;
       }
 
-      h1 {
-        margin: 0 0 2px;
-        font-size: 13px;
-      }
-
-      p.lede {
-        margin: 0 0 12px;
-        color: var(--figma-color-text-secondary);
-      }
-
-      fieldset {
-        margin: 0 0 12px;
-        padding: 8px 10px 10px;
-        border: 1px solid var(--figma-color-border);
-        border-radius: 6px;
-      }
-
-      legend {
-        padding: 0 4px;
-        font-weight: 600;
-      }
-
-      ul.namespaces {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-      }
-
-      ul.namespaces li {
+      /* Surfaces default to the page tone; lift them so cards read as cards.
+         The stock selected row is the theme secondary fill — too loud when a
+         dozen rows are ticked at once. */
+      .vc-shell {
+        --list-bg: var(--box-box-normal-background-whiteonly, #ffffff);
+        --card-bg: var(--box-box-normal-background-whiteonly, #ffffff);
+        --list-item-selected-bg: var(--box-box-theme-lightbackground, #ffe9e3);
         display: flex;
-        gap: 6px;
-        align-items: baseline;
-        padding: 3px 0;
+        flex-direction: column;
+        height: 100%;
+        min-width: 0;
+      }
+      .vc-shell > .aviala-pagehead {
+        flex: none;
+        padding-inline: var(--padding-big, 14px);
       }
 
-      ul.namespaces code {
-        color: var(--figma-color-text-secondary);
+      /* Four steps must fit ~380px: drop the 120px per-step floor. */
+      .vc-rail {
+        flex: none;
+        padding: var(--padding-default, 8px) var(--padding-big, 14px);
+        background: var(--box-box-normal-background-whiteonly, #ffffff);
+        border-bottom: 1px solid var(--border-border-normal-1, #f0efef);
       }
-
-      .meta {
-        margin-left: auto;
-        color: var(--figma-color-text-tertiary);
+      .vc-rail .aviala-steps {
+        --steps-item-min-width: 0;
+        --steps-gap: var(--gap-component-space, 8px);
       }
-
-      .seeds {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 6px;
+      .vc-step {
+        min-width: 0;
       }
-
-      label.seed {
-        display: flex;
-        gap: 6px;
-        align-items: center;
-        justify-content: space-between;
-      }
-
-      input[type='text'] {
-        width: 90px;
-        padding: 3px 5px;
-        color: var(--figma-color-text);
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        background: var(--figma-color-bg-secondary);
-        border: 1px solid var(--figma-color-border);
-        border-radius: 4px;
-      }
-
-      .actions {
-        display: flex;
-        gap: 6px;
-        margin-bottom: 10px;
-      }
-
-      button {
-        flex: 1;
-        padding: 6px 8px;
-        font-weight: 600;
-        background: var(--figma-color-bg-secondary);
-        color: var(--figma-color-text);
-        border: 1px solid var(--figma-color-border);
-        border-radius: 5px;
+      .vc-step[data-clickable='true'] {
         cursor: pointer;
       }
 
-      button.primary {
-        background: var(--figma-color-bg-brand);
-        color: var(--figma-color-text-onbrand);
-        border-color: transparent;
+      .vc-body {
+        flex: 1 1 auto;
+        min-height: 0;
+      }
+      .vc-body-inner {
+        padding: var(--padding-middle, 10px) var(--padding-big, 14px)
+          var(--padding-big, 14px);
       }
 
-      button:disabled {
-        opacity: 0.5;
-        cursor: default;
+      .vc-foot {
+        flex: none;
+        padding: var(--padding-middle, 10px) var(--padding-big, 14px);
+        background: var(--box-box-normal-background-whiteonly, #ffffff);
+        border-top: 1px solid var(--border-border-normal-1, #f0efef);
       }
 
-      #output {
+      .vc-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--gap-component-space, 8px);
+        min-width: 0;
+      }
+      .vc-row--tight {
+        gap: var(--gap-inside, 4px);
+      }
+      /* Zero basis, not auto: Spiral's field shells are `width: 100%`, which in
+         a wrapping row would claim the whole line and push siblings down. */
+      .vc-grow {
+        flex: 1 1 0;
+        min-width: 0;
+      }
+      .vc-push {
+        margin-inline-start: auto;
+      }
+      .vc-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .vc-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: var(--gap-component-space, 8px);
+      }
+
+      .vc-mono {
+        font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, monospace;
+        font-size: var(--typography-caption-size, 0.75rem);
+        line-height: var(--typography-caption-line-height, 1rem);
+      }
+      .vc-log {
         margin: 0;
-        padding: 8px;
-        max-height: 260px;
-        overflow: auto;
+        padding: var(--padding-middle, 10px) var(--padding-big, 14px);
         white-space: pre-wrap;
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        background: var(--figma-color-bg-secondary);
-        border-radius: 6px;
+        word-break: break-word;
+        color: var(--typography-caption-fg, #616060);
       }
 
-      .error {
-        color: var(--figma-color-text-danger);
+      /* Dense path table — hundreds of rows, so rows stay cheap. */
+      .vc-paths {
+        padding: var(--padding-small, 6px) 0;
+      }
+      .vc-path {
+        display: flex;
+        gap: var(--gap-inside, 4px);
+        padding: 1px var(--padding-big, 14px);
+      }
+      .vc-path__mark {
+        width: 1ch;
+        flex: none;
+        color: var(--typography-caption-fg, #616060);
+      }
+      .vc-path__mark[data-status='new'] {
+        color: var(--text-text-theme-primary-black, #bf2300);
+      }
+      .vc-vocab-error {
+        color: var(--text-text-error-primary, #bf2300);
       }
     </style>
   </head>
   <body>
-    <h1>VarCat</h1>
-    <p class="lede">Create Aviala Design Figma Variables from the closed paradigm vocabulary.</p>
-
-    <fieldset>
-      <legend>Namespaces</legend>
-      <ul class="namespaces" id="namespaces"></ul>
-      <label style="display: flex; gap: 6px; margin-top: 8px; align-items: center">
-        <input type="checkbox" id="allEffects" />
-        Expand every legal effect path (default: enabled whitelist only)
-      </label>
-    </fieldset>
-
-    <fieldset>
-      <legend>Palette seeds</legend>
-      <div class="seeds" id="seeds"></div>
-    </fieldset>
-
-    <div class="actions">
-      <button id="dryRun">Dry-run</button>
-      <button id="validate">Validate selection</button>
-      <button id="apply" class="primary">Apply</button>
-    </div>
-
-    <pre id="output">Ready.</pre>
-
+    <div id="root"></div>
     <script src="ui.js"></script>
   </body>
 </html>

@@ -159,6 +159,50 @@ describe('batch report', () => {
   });
 });
 
+describe('retired component types', () => {
+  it('reports the Spiral replacement without renaming anything', () => {
+    const result = validateVariablePath('dialog/filled-primary-background-rest');
+    expect(result.valid).toBe(false);
+    const retired = result.issues.find((issue) => issue.code === 'retiredType');
+    expect(retired?.message).toContain('modal');
+    expect(result.path).toBe('dialog/filled-primary-background-rest');
+  });
+
+  it('covers every retired name', () => {
+    for (const [retired, replacement] of [
+      ['dialog', 'modal'],
+      ['menu', 'navigation'],
+      ['toast', 'feedback']
+    ] as const) {
+      const result = validateVariablePath(`${retired}/filled-primary-background-rest`);
+      expect(result.issues.map((issue) => issue.code)).toContain('retiredType');
+      expect(result.issues.find((issue) => issue.code === 'retiredType')?.message).toContain(
+        replacement
+      );
+    }
+  });
+
+  it('says so plainly when there is no Spiral equivalent', () => {
+    for (const retired of ['divider', 'icon']) {
+      const result = validateVariablePath(`${retired}/filled-primary-background-rest`);
+      const issue = result.issues.find((candidate) => candidate.code === 'retiredType');
+      expect(issue?.message).toContain('no Spiral equivalent');
+    }
+  });
+});
+
+describe('the component vocabulary follows the Spiral catalog', () => {
+  it('accepts a Spiral component type that VarCat did not have before', () => {
+    const result = validateInNamespace('modal/filled-primary-background-rest', 'component');
+    expect(result.issues.map((issue) => issue.code)).not.toContain('unknownSlotValue');
+  });
+
+  it('keeps steps singular-safe', () => {
+    const result = validateInNamespace('steps/filled-primary-background-rest', 'component');
+    expect(result.issues.map((issue) => issue.code)).not.toContain('pluralSlot');
+  });
+});
+
 describe('scale namespaces share one shape', () => {
   it('accepts the same key in all three collections', () => {
     for (const key of ['scaleStatic', 'scaleDensity', 'scaleContrast'] as const) {

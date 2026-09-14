@@ -1,0 +1,44 @@
+{
+  "id": "spiral.input",
+  "kind": "component",
+  "spiral": {
+    "displayName": "Input",
+    "group": "Information Collect",
+    "source": "packages/ui/src/components/input.tsx",
+    "variantProp": null,
+    "cssReference": "packages/tokens/src/semantic/input-effects.css, basic-input-effects.css"
+  },
+  "note": "Spiral Input has no appearance axis — its cva variants are layout only (fullWidth). The leaf is a two-slot shape, which is what makes the template-owned shape necessary.",
+  "collection": "component",
+  "modes": ["light", "dark"],
+  "group": "input",
+  "shape": "{role}-{state}",
+  "valueType": "COLOR",
+  "axes": [
+    {
+      "slot": "role",
+      "label": "Part",
+      "labelZh": "部位",
+      "values": ["background", "foreground", "border", "placeholder", "icon", "focusRing", "shadow"],
+      "default": ["background", "foreground", "border"]
+    },
+    {
+      "slot": "state",
+      "label": "State",
+      "labelZh": "状态",
+      "note": "activated is Spiral's word for a filled, non-focused field.",
+      "values": ["rest", "hover", "activated", "focus", "disabled", "error"],
+      "default": ["rest", "hover", "activated"]
+    }
+  ],
+  "exclude": [
+    { "why": "a focus ring only exists in the focus and error states", "role": ["focusRing"], "state": ["rest", "hover", "activated", "disabled"] },
+    { "why": "placeholder text does not react to hover or content", "role": ["placeholder"], "state": ["hover", "activated", "focus"] }
+  ],
+  "extras": [
+    { "path": "input/shell-paddingX", "valueType": "FLOAT", "note": "--input-shell-px" },
+    { "path": "input/shell-gap", "valueType": "FLOAT", "note": "--input-shell-gap" },
+    { "path": "input/field-paddingY", "valueType": "FLOAT", "note": "--input-shell-field-py" },
+    { "path": "input/slot-paddingY", "valueType": "FLOAT", "note": "--input-shell-slot-py" }
+  ]
+}

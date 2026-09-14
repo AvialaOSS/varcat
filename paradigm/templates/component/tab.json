@@ -1,0 +1,52 @@
+{
+  "id": "spiral.tab",
+  "kind": "component",
+  "spiral": {
+    "displayName": "Tab",
+    "group": "Structure Navigation",
+    "source": "packages/ui/src/components/tab.tsx",
+    "variantProp": "style",
+    "cssReference": "packages/tokens/src/semantic/tab-effects.css"
+  },
+  "collection": "component",
+  "modes": ["light", "dark"],
+  "group": "tab",
+  "shape": "{variant}-{role}-{state}",
+  "valueType": "COLOR",
+  "axes": [
+    {
+      "slot": "variant",
+      "label": "Appearance",
+      "labelZh": "外观",
+      "note": "Spiral TabStyle, verbatim.",
+      "values": ["default", "card", "tiled"],
+      "default": ["default"]
+    },
+    {
+      "slot": "role",
+      "label": "Part",
+      "labelZh": "部位",
+      "values": ["background", "foreground", "indicator", "ear", "icon"],
+      "default": ["background", "foreground", "indicator"]
+    },
+    {
+      "slot": "state",
+      "label": "State",
+      "labelZh": "状态",
+      "values": ["rest", "hover", "selected", "active", "disabled"],
+      "default": ["rest", "hover", "selected"]
+    }
+  ],
+  "exclude": [
+    { "why": "the notch between adjacent tabs only exists in the card style", "variant": ["default", "tiled"], "role": ["ear"] },
+    { "why": "the indicator is only painted under the selected tab", "role": ["indicator"], "state": ["rest", "disabled"] }
+  ],
+  "extras": [
+    { "path": "tab/indicator-height", "valueType": "FLOAT", "note": "--tab-indicator-height" },
+    { "path": "tab/indicator-radius", "valueType": "FLOAT", "note": "--tab-indicator-radius" },
+    { "path": "tab/list-gap", "valueType": "FLOAT", "note": "--tab-list-gap" },
+    { "path": "tab/item-radius", "valueType": "FLOAT", "note": "--tab-item-control-radius" },
+    { "path": "tab/item-paddingX", "valueType": "FLOAT", "note": "--tab-px" },
+    { "path": "tab/card-earSize", "valueType": "FLOAT", "note": "--tab-card-ear-size" }
+  ]
+}

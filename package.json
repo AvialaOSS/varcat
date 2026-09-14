@@ -2,24 +2,32 @@
   "name": "varcat",
   "version": "0.1.0",
   "private": true,
-  "description": "Figma plugin that creates Aviala Design Variables from a closed naming paradigm",
+  "description": "Figma plugin that creates Spiral-named Figma Variables as empty shells from a closed naming paradigm",
   "type": "module",
   "license": "MIT",
   "scripts": {
     "build": "node ./scripts/build.mjs",
     "watch": "node ./scripts/build.mjs --watch",
+    "preview": "node ./scripts/build.mjs && node ./scripts/preview-ui.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "dry-run": "node ./scripts/dry-run.mjs",
-    "paradigm:generate": "node ./scripts/generate-paradigm.mjs"
+    "paradigm:generate": "node ./scripts/generate-paradigm.mjs",
+    "spiral:catalog": "node ./scripts/sync-spiral-catalog.mjs",
+    "spiral:catalog:check": "node ./scripts/sync-spiral-catalog.mjs --check"
   },
   "dependencies": {
-    "@aviala-design/color": "^0.5.16"
+    "@aviala-design/color": "^0.5.16",
+    "@aviala-design/spiral": "^3.0.2",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   },
   "devDependencies": {
     "@figma/plugin-typings": "^1.99.0",
     "@types/node": "^20.19.43",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "esbuild": "^0.23.0",
     "typescript": "^5.5.0",
     "vitest": "^2.1.0"

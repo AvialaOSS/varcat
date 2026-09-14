@@ -1,19 +1,40 @@
-import { applyPlan } from './figma/apply';
+import { applyPlan, formatUnboundList } from './figma/apply';
+import { buildVariableIndex, lookupVariable } from './figma/upsert';
 import { expandPlan, type Plan } from './paradigm/expand';
+import {
+  expandTemplatePlan,
+  isComponentTemplate,
+  spiralCatalog,
+  templateRegistry,
+  templates,
+  type TemplateSelection
+} from './paradigm/templates';
 import { validateVariablePath, type ValidationResult } from './paradigm/validate';
+import {
+  emptyVocabOverlay,
+  isVocabOverlay,
+  resolveTemplate,
+  templateSummariesWithOverlay,
+  type VocabOverlay
+} from './paradigm/vocab-overlay';
 import { getNamespace, NAMESPACE_KEYS, vocabulary, type NamespaceKey } from './paradigm/vocabulary';
 import { buildPaletteRamps, DEFAULT_SEEDS, type PaletteFamily } from './palette/ramp';
 
 declare const UI_HTML: string;
 
+const VOCAB_OVERLAY_KEY = 'varcat.vocab.overlay';
+
 type SeedMap = Partial<Record<PaletteFamily, string>>;
 
 type UiMessage =
   | { type: 'init' }
-  | { type: 'dryRun'; namespaces: NamespaceKey[]; seeds?: SeedMap; allEffects?: boolean }
-  | { type: 'apply'; namespaces: NamespaceKey[]; seeds?: SeedMap; allEffects?: boolean }
-  | { type: 'validate' }
-  | { type: 'resize'; width: number; height: number };
+  | { type: 'templateDryRun'; selections: TemplateSelection[]; hiddenFromPublishing?: boolean }
+  | { type: 'templateApply'; selections: TemplateSelection[]; hiddenFromPublishing?: boolean }
+  | { type: 'fullDryRun'; namespaces: NamespaceKey[]; seeds?: SeedMap; allEffects?: boolean }
+  | { type: 'fullApply'; namespaces: NamespaceKey[]; seeds?: SeedMap; allEffects?: boolean }
+  | { type: 'validateFile' }
+  | { type: 'resize'; width: number; height: number }
+  | { type: 'vocabOverlaySave'; overlay: VocabOverlay };
 
 const SEED_PATTERN = /^#?[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/;
 
@@ -28,13 +49,57 @@ const sanitizeSeeds = (raw?: SeedMap): SeedMap => {
   return seeds;
 };
 
+/**
+ * No empty-selection fallback. An empty selection used to expand to all eight
+ * namespaces, so unchecking everything wrote 757 variables; now it writes none.
+ */
 const sanitizeNamespaces = (raw: unknown): NamespaceKey[] => {
   const requested = Array.isArray(raw) ? raw.map(String) : [];
-  const selected = NAMESPACE_KEYS.filter((key) => requested.includes(key));
-  return selected.length > 0 ? selected : [...NAMESPACE_KEYS];
+  return NAMESPACE_KEYS.filter((key) => requested.includes(key));
 };
 
-const buildPlan = (message: {
+const sanitizeSelections = (
+  raw: unknown,
+  overlay: VocabOverlay
+): TemplateSelection[] => {
+  if (!Array.isArray(raw)) return [];
+  const known = new Set(templates.map((template) => template.id));
+  const out: TemplateSelection[] = [];
+  for (const row of raw) {
+    if (!row || typeof row !== 'object') continue;
+    const id = String((row as any).id ?? '');
+    if (!known.has(id)) continue;
+    const template = resolveTemplate(id, overlay);
+    const axes: Record<string, string[]> = {};
+    if (isComponentTemplate(template) && (row as any).axes) {
+      for (const axis of template.axes) {
+        const requested = (row as any).axes[axis.slot];
+        if (Array.isArray(requested)) {
+          axes[axis.slot] = axis.values.filter((value) => requested.includes(value));
+        }
+      }
+    }
+    out.push({
+      id,
+      axes: Object.keys(axes).length > 0 ? axes : undefined,
+      includeExtras: (row as any).includeExtras === true
+    });
+  }
+  return out;
+};
+
+const readVocabOverlay = async (): Promise<VocabOverlay> => {
+  const stored = await figma.clientStorage.getAsync(VOCAB_OVERLAY_KEY);
+  return isVocabOverlay(stored) ? stored : emptyVocabOverlay();
+};
+
+const writeVocabOverlay = async (overlay: VocabOverlay): Promise<VocabOverlay> => {
+  const next = isVocabOverlay(overlay) ? overlay : emptyVocabOverlay();
+  await figma.clientStorage.setAsync(VOCAB_OVERLAY_KEY, next);
+  return next;
+};
+
+const buildFullPlan = (message: {
   namespaces: NamespaceKey[];
   seeds?: SeedMap;
   allEffects?: boolean;
@@ -45,7 +110,46 @@ const buildPlan = (message: {
     allEffects: message.allEffects === true
   });
 
-const planPayload = (plan: Plan, namespaces: NamespaceKey[]) => ({
+/**
+ * Every collection the plan touches, with the modes it needs and the modes the
+ * file can actually host. Five of the eight collections need two modes, and a
+ * Figma plan capped at one silently drops half the tree, so this is checked and
+ * surfaced before Apply rather than noted in parentheses afterwards.
+ */
+const modeBudget = async (collections: Array<{ name: string; modes: string[] }>) => {
+  const existing = await figma.variables.getLocalVariableCollectionsAsync();
+  const byName = new Map(existing.map((collection) => [collection.name, collection]));
+  return collections.map((row) => {
+    const found = byName.get(row.name);
+    return {
+      collection: row.name,
+      needs: row.modes,
+      has: found ? found.modes.map((mode) => mode.name) : [],
+      exists: !!found
+    };
+  });
+};
+
+/** Full path list for the dry-run, annotated new / existing against the file. */
+const annotatePaths = async (
+  entries: Array<{ collection: string; path: string; valueType: string }>
+) => {
+  const collections = await figma.variables.getLocalVariableCollectionsAsync();
+  const idByName = new Map(collections.map((collection) => [collection.name, collection.id]));
+  const index = await buildVariableIndex();
+  return entries.map((entry) => {
+    const collectionId = idByName.get(entry.collection);
+    const found = collectionId ? lookupVariable(index, collectionId, entry.path) : null;
+    return {
+      collection: entry.collection,
+      path: entry.path,
+      valueType: entry.valueType,
+      status: found ? ('existing' as const) : ('new' as const)
+    };
+  });
+};
+
+const fullPlanPayload = (plan: Plan, namespaces: NamespaceKey[]) => ({
   total: plan.total,
   counts: plan.counts,
   collections: namespaces.map((key) => {
@@ -83,7 +187,9 @@ const validateFile = async () => {
       path: variable.name,
       namespace: result.namespace ?? null,
       valid: result.valid,
-      issues: result.issues.map((issue) => issue.message)
+      issues: result.issues.map((issue) => issue.message),
+      retired: result.issues.some((issue) => issue.code === 'retiredType'),
+      unfilled: (variable.description ?? '').indexOf(templateRegistry.unboundNote) === 0
     };
   });
 
@@ -92,6 +198,7 @@ const validateFile = async () => {
     total: rows.length,
     validCount: rows.length - violations.length,
     invalidCount: violations.length,
+    unfilledCount: rows.filter((row) => row.unfilled).length,
     violations: violations.slice(0, 200),
     paradigmCollections: [...namespaceByCollection.keys()].filter((name) =>
       collections.some((collection) => collection.name === name)
@@ -100,7 +207,9 @@ const validateFile = async () => {
 };
 
 const main = async () => {
-  figma.showUI(UI_HTML, { width: 460, height: 720, themeColors: true });
+  // Panel is laid out for a dense plugin column; 520 left the step rail and
+  // path list swimming in empty space.
+  figma.showUI(UI_HTML, { width: 400, height: 720, themeColors: true });
 
   const stored = (await figma.clientStorage.getAsync('varcat.ui.size')) as
     | { w: number; h: number }
@@ -112,10 +221,22 @@ const main = async () => {
     );
   }
 
+  let vocabOverlay = await readVocabOverlay();
+
   const sendInit = () => {
     figma.ui.postMessage({
       type: 'init',
       version: vocabulary.version,
+      templateVersion: templateRegistry.version,
+      thresholds: templateRegistry.thresholds,
+      unboundNote: templateRegistry.unboundNote,
+      templates: templateSummariesWithOverlay(vocabOverlay),
+      vocabOverlay,
+      catalog: {
+        source: spiralCatalog.source,
+        componentCount: spiralCatalog.componentCount,
+        groups: spiralCatalog.groups.map((group) => group.name)
+      },
       seeds: DEFAULT_SEEDS,
       namespaces: NAMESPACE_KEYS.map((key) => {
         const namespace = getNamespace(key);
@@ -133,6 +254,7 @@ const main = async () => {
   figma.ui.onmessage = async (message: UiMessage) => {
     try {
       if (message.type === 'init') {
+        vocabOverlay = await readVocabOverlay();
         sendInit();
         return;
       }
@@ -145,31 +267,113 @@ const main = async () => {
         return;
       }
 
-      if (message.type === 'dryRun') {
-        const namespaces = sanitizeNamespaces(message.namespaces);
-        const plan = buildPlan({ ...message, namespaces });
-        figma.ui.postMessage({ type: 'plan', ...planPayload(plan, namespaces) });
+      if (message.type === 'vocabOverlaySave') {
+        vocabOverlay = await writeVocabOverlay(message.overlay);
+        figma.ui.postMessage({
+          type: 'vocabOverlaySaved',
+          overlay: vocabOverlay,
+          templates: templateSummariesWithOverlay(vocabOverlay)
+        });
         return;
       }
 
-      if (message.type === 'apply') {
-        const namespaces = sanitizeNamespaces(message.namespaces);
-        const plan = buildPlan({ ...message, namespaces });
+      if (message.type === 'templateDryRun' || message.type === 'templateApply') {
+        const selections = sanitizeSelections(message.selections, vocabOverlay);
+        if (selections.length === 0) {
+          figma.ui.postMessage({
+            type: 'error',
+            message: '未选模板。请至少选一个模板 — VarCat 不会在空选择上写入。'
+          });
+          return;
+        }
+
+        const plan = expandTemplatePlan(selections, {
+          hiddenFromPublishing: message.hiddenFromPublishing === true,
+          resolve: (id) => resolveTemplate(id, vocabOverlay)
+        });
+
+        const collections = [...new Set(plan.entries.map((entry) => entry.collection))].map(
+          (name) => ({
+            name,
+            modes: getNamespace(
+              plan.entries.find((entry) => entry.collection === name)!.namespace
+            ).modes
+          })
+        );
+
+        if (message.type === 'templateDryRun') {
+          figma.ui.postMessage({
+            type: 'templatePlan',
+            total: plan.total,
+            counts: plan.counts,
+            excluded: plan.excluded,
+            invalid: plan.invalid.map((result) => ({
+              path: result.path,
+              issues: result.issues.map((issue) => issue.message)
+            })),
+            modeBudget: await modeBudget(collections),
+            paths: await annotatePaths(plan.entries)
+          });
+          return;
+        }
+
         if (plan.invalid.length > 0) {
           figma.ui.postMessage({
             type: 'error',
-            message: `Plan rejected: ${plan.invalid.length} path(s) violate the paradigm`,
+            message: `计划已拒绝：${plan.invalid.length} 条路径违反范式`,
             invalid: plan.invalid.map((result) => result.path)
           });
           return;
         }
-        const summary = await applyPlan(plan);
-        figma.ui.postMessage({ type: 'applied', total: plan.total, summary });
-        figma.notify(`VarCat: ${summary.created} created, ${summary.updated} updated`);
+
+        const summary = await applyPlan(plan, {
+          onProgress: (progress) => figma.ui.postMessage({ type: 'progress', ...progress })
+        });
+        figma.ui.postMessage({
+          type: 'templateApplied',
+          total: plan.total,
+          summary,
+          unfilledList: formatUnboundList(summary.unbound)
+        });
+        figma.notify(
+          `VarCat：新建空壳 ${summary.unbound.length}，已存在未改 ${summary.existing.length}`
+        );
         return;
       }
 
-      if (message.type === 'validate') {
+      if (message.type === 'fullDryRun' || message.type === 'fullApply') {
+        const namespaces = sanitizeNamespaces(message.namespaces);
+        if (namespaces.length === 0) {
+          figma.ui.postMessage({
+            type: 'error',
+            message: '未选命名空间。无可展开内容。'
+          });
+          return;
+        }
+        const plan = buildFullPlan({ ...message, namespaces });
+
+        if (message.type === 'fullDryRun') {
+          figma.ui.postMessage({ type: 'plan', ...fullPlanPayload(plan, namespaces) });
+          return;
+        }
+
+        if (plan.invalid.length > 0) {
+          figma.ui.postMessage({
+            type: 'error',
+            message: `计划已拒绝：${plan.invalid.length} 条路径违反范式`,
+            invalid: plan.invalid.map((result) => result.path)
+          });
+          return;
+        }
+        const summary = await applyPlan(plan, {
+          onProgress: (progress) => figma.ui.postMessage({ type: 'progress', ...progress })
+        });
+        figma.ui.postMessage({ type: 'applied', total: plan.total, summary });
+        figma.notify(`VarCat：新建 ${summary.created}，更新 ${summary.updated}`);
+        return;
+      }
+
+      if (message.type === 'validateFile') {
         figma.ui.postMessage({ type: 'report', ...(await validateFile()) });
         return;
       }

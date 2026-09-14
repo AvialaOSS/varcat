@@ -1,0 +1,52 @@
+{
+  "id": "spiral.segmentator",
+  "kind": "component",
+  "spiral": {
+    "displayName": "Segmentator",
+    "group": "Basic Input",
+    "source": "packages/ui/src/components/segmentator.tsx",
+    "variantProp": "mode",
+    "cssReference": "packages/tokens/src/semantic/basic-input-effects.css"
+  },
+  "collection": "component",
+  "modes": ["light", "dark"],
+  "group": "segmentator",
+  "shape": "{variant}-{role}-{state}",
+  "valueType": "COLOR",
+  "axes": [
+    {
+      "slot": "variant",
+      "label": "Appearance",
+      "labelZh": "外观",
+      "note": "Spiral SegmentatorMode, verbatim.",
+      "values": ["nested", "tiled"],
+      "default": ["nested"]
+    },
+    {
+      "slot": "role",
+      "label": "Part",
+      "labelZh": "部位",
+      "values": ["background", "foreground", "item", "thumb", "shadow"],
+      "default": ["background", "foreground", "thumb"]
+    },
+    {
+      "slot": "state",
+      "label": "State",
+      "labelZh": "状态",
+      "values": ["rest", "hover", "selected", "active", "disabled"],
+      "default": ["rest", "hover", "selected"]
+    }
+  ],
+  "exclude": [
+    { "why": "the group background does not react to per-item state", "role": ["background"], "state": ["hover", "selected", "active"] },
+    { "why": "the sliding thumb only renders under the selected item", "role": ["thumb"], "state": ["rest", "disabled"] }
+  ],
+  "extras": [
+    { "path": "segmentator/group-radius", "valueType": "FLOAT", "note": "--segmentator-group-radius" },
+    { "path": "segmentator/group-gap", "valueType": "FLOAT", "note": "--segmentator-group-gap" },
+    { "path": "segmentator/group-padding", "valueType": "FLOAT", "note": "--segmentator-group-padding" },
+    { "path": "segmentator/item-gap", "valueType": "FLOAT", "note": "--segmentator-item-gap" },
+    { "path": "segmentator/nested-radius", "valueType": "FLOAT", "note": "--segmentator-item-nested-radius" },
+    { "path": "segmentator/tiled-radius", "valueType": "FLOAT", "note": "--segmentator-item-tiled-radius" }
+  ]
+}

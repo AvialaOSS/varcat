@@ -22,11 +22,22 @@ export type PlanEntry = {
   collection: string;
   path: string;
   valueType: ValueType;
-  kind: 'literal' | 'alias';
+  /**
+   * `unbound` is an empty shell: Apply creates the variable and then stops, so
+   * every mode keeps whatever initial value Figma assigns. It is a normal
+   * result, not a skip — see `ApplySummary.unbound`.
+   */
+  kind: 'literal' | 'alias' | 'unbound';
   /** mode name → hex (COLOR) or number (FLOAT). Literal entries only. */
   values?: Record<string, string | number>;
   /** mode name → alias target. Alias entries only. */
   aliases?: Record<string, AliasRef>;
+  /** Template that produced the entry. Unbound entries only. */
+  templateId?: string;
+  /** Written to `Variable.description` so an unfilled shell is findable. */
+  note?: string;
+  /** Keep an unfilled shell out of the published team library. */
+  hiddenFromPublishing?: boolean;
 };
 
 export type Plan = {
