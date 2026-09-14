@@ -18,7 +18,7 @@
       "slot": "variant",
       "label": "Appearance",
       "labelZh": "外观",
-      "note": "Spiral ButtonMode, verbatim.",
+      "note": "Plan closed vocabulary for the appearance slot (curated template JSON).",
       "values": [
         "primary",
         "second",

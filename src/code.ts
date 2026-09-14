@@ -3,19 +3,26 @@ import { buildVariableIndex, lookupVariable } from './figma/upsert';
 import { expandPlan, type Plan } from './paradigm/expand';
 import {
   expandTemplatePlan,
-  getTemplate,
   isComponentTemplate,
   spiralCatalog,
   templateRegistry,
-  templateSummaries,
   templates,
   type TemplateSelection
 } from './paradigm/templates';
 import { validateVariablePath, type ValidationResult } from './paradigm/validate';
+import {
+  emptyVocabOverlay,
+  isVocabOverlay,
+  resolveTemplate,
+  templateSummariesWithOverlay,
+  type VocabOverlay
+} from './paradigm/vocab-overlay';
 import { getNamespace, NAMESPACE_KEYS, vocabulary, type NamespaceKey } from './paradigm/vocabulary';
 import { buildPaletteRamps, DEFAULT_SEEDS, type PaletteFamily } from './palette/ramp';
 
 declare const UI_HTML: string;
+
+const VOCAB_OVERLAY_KEY = 'varcat.vocab.overlay';
 
 type SeedMap = Partial<Record<PaletteFamily, string>>;
 
@@ -26,7 +33,8 @@ type UiMessage =
   | { type: 'fullDryRun'; namespaces: NamespaceKey[]; seeds?: SeedMap; allEffects?: boolean }
   | { type: 'fullApply'; namespaces: NamespaceKey[]; seeds?: SeedMap; allEffects?: boolean }
   | { type: 'validateFile' }
-  | { type: 'resize'; width: number; height: number };
+  | { type: 'resize'; width: number; height: number }
+  | { type: 'vocabOverlaySave'; overlay: VocabOverlay };
 
 const SEED_PATTERN = /^#?[0-9a-fA-F]{3}(?:[0-9a-fA-F]{3})?$/;
 
@@ -50,7 +58,10 @@ const sanitizeNamespaces = (raw: unknown): NamespaceKey[] => {
   return NAMESPACE_KEYS.filter((key) => requested.includes(key));
 };
 
-const sanitizeSelections = (raw: unknown): TemplateSelection[] => {
+const sanitizeSelections = (
+  raw: unknown,
+  overlay: VocabOverlay
+): TemplateSelection[] => {
   if (!Array.isArray(raw)) return [];
   const known = new Set(templates.map((template) => template.id));
   const out: TemplateSelection[] = [];
@@ -58,7 +69,7 @@ const sanitizeSelections = (raw: unknown): TemplateSelection[] => {
     if (!row || typeof row !== 'object') continue;
     const id = String((row as any).id ?? '');
     if (!known.has(id)) continue;
-    const template = getTemplate(id);
+    const template = resolveTemplate(id, overlay);
     const axes: Record<string, string[]> = {};
     if (isComponentTemplate(template) && (row as any).axes) {
       for (const axis of template.axes) {
@@ -75,6 +86,17 @@ const sanitizeSelections = (raw: unknown): TemplateSelection[] => {
     });
   }
   return out;
+};
+
+const readVocabOverlay = async (): Promise<VocabOverlay> => {
+  const stored = await figma.clientStorage.getAsync(VOCAB_OVERLAY_KEY);
+  return isVocabOverlay(stored) ? stored : emptyVocabOverlay();
+};
+
+const writeVocabOverlay = async (overlay: VocabOverlay): Promise<VocabOverlay> => {
+  const next = isVocabOverlay(overlay) ? overlay : emptyVocabOverlay();
+  await figma.clientStorage.setAsync(VOCAB_OVERLAY_KEY, next);
+  return next;
 };
 
 const buildFullPlan = (message: {
@@ -199,6 +221,8 @@ const main = async () => {
     );
   }
 
+  let vocabOverlay = await readVocabOverlay();
+
   const sendInit = () => {
     figma.ui.postMessage({
       type: 'init',
@@ -206,7 +230,8 @@ const main = async () => {
       templateVersion: templateRegistry.version,
       thresholds: templateRegistry.thresholds,
       unboundNote: templateRegistry.unboundNote,
-      templates: templateSummaries(),
+      templates: templateSummariesWithOverlay(vocabOverlay),
+      vocabOverlay,
       catalog: {
         source: spiralCatalog.source,
         componentCount: spiralCatalog.componentCount,
@@ -229,6 +254,7 @@ const main = async () => {
   figma.ui.onmessage = async (message: UiMessage) => {
     try {
       if (message.type === 'init') {
+        vocabOverlay = await readVocabOverlay();
         sendInit();
         return;
       }
@@ -241,8 +267,18 @@ const main = async () => {
         return;
       }
 
+      if (message.type === 'vocabOverlaySave') {
+        vocabOverlay = await writeVocabOverlay(message.overlay);
+        figma.ui.postMessage({
+          type: 'vocabOverlaySaved',
+          overlay: vocabOverlay,
+          templates: templateSummariesWithOverlay(vocabOverlay)
+        });
+        return;
+      }
+
       if (message.type === 'templateDryRun' || message.type === 'templateApply') {
-        const selections = sanitizeSelections(message.selections);
+        const selections = sanitizeSelections(message.selections, vocabOverlay);
         if (selections.length === 0) {
           figma.ui.postMessage({
             type: 'error',
@@ -252,7 +288,8 @@ const main = async () => {
         }
 
         const plan = expandTemplatePlan(selections, {
-          hiddenFromPublishing: message.hiddenFromPublishing === true
+          hiddenFromPublishing: message.hiddenFromPublishing === true,
+          resolve: (id) => resolveTemplate(id, vocabOverlay)
         });
 
         const collections = [...new Set(plan.entries.map((entry) => entry.collection))].map(

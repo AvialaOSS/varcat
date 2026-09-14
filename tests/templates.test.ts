@@ -119,8 +119,7 @@ describe('shape', () => {
 describe('button', () => {
   const button = getTemplate('spiral.button') as ComponentTemplate;
 
-  it('takes its appearance axis from the Spiral mode prop, verbatim', () => {
-    expect(button.spiral.variantProp).toBe('mode');
+  it('keeps the curated appearance axis as the plan closed vocabulary', () => {
     expect(button.axes.find((axis) => axis.slot === 'variant')?.values).toEqual([
       'primary',
       'second',

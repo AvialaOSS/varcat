@@ -10,9 +10,15 @@ import {
   expandTemplatePlan,
   spiralCatalog,
   templateRegistry,
-  templateSummaries,
   type TemplateSelection
 } from '../../src/paradigm/templates';
+import {
+  emptyVocabOverlay,
+  isVocabOverlay,
+  resolveTemplate,
+  templateSummariesWithOverlay,
+  type VocabOverlay
+} from '../../src/paradigm/vocab-overlay';
 import { getNamespace, NAMESPACE_KEYS, vocabulary } from '../../src/paradigm/vocabulary';
 
 /**
@@ -20,6 +26,8 @@ import { getNamespace, NAMESPACE_KEYS, vocabulary } from '../../src/paradigm/voc
  * `parent === window` the harness would otherwise answer itself forever.
  */
 const FROM_HARNESS = '__varcatPreviewReply';
+
+let vocabOverlay: VocabOverlay = emptyVocabOverlay();
 
 const reply = (message: Record<string, unknown>) => {
   window.postMessage({ pluginMessage: { ...message, [FROM_HARNESS]: true } }, '*');
@@ -31,7 +39,8 @@ const initPayload = () => ({
   templateVersion: templateRegistry.version,
   thresholds: templateRegistry.thresholds,
   unboundNote: templateRegistry.unboundNote,
-  templates: templateSummaries(),
+  templates: templateSummariesWithOverlay(vocabOverlay),
+  vocabOverlay,
   catalog: {
     source: spiralCatalog.source,
     componentCount: spiralCatalog.componentCount,
@@ -51,7 +60,10 @@ const initPayload = () => ({
 });
 
 const planPayload = (selections: TemplateSelection[]) => {
-  const plan = expandTemplatePlan(selections, { hiddenFromPublishing: true });
+  const plan = expandTemplatePlan(selections, {
+    hiddenFromPublishing: true,
+    resolve: (id) => resolveTemplate(id, vocabOverlay)
+  });
   const collections = [...new Set(plan.entries.map((entry) => entry.collection))];
   return {
     type: 'templatePlan',
@@ -110,7 +122,8 @@ const REQUESTS = new Set([
   'fullDryRun',
   'fullApply',
   'validateFile',
-  'resize'
+  'resize',
+  'vocabOverlaySave'
 ]);
 
 window.addEventListener('message', (event: MessageEvent) => {
@@ -123,6 +136,15 @@ window.addEventListener('message', (event: MessageEvent) => {
 
   if (message.type === 'init') {
     reply(initPayload());
+    return;
+  }
+  if (message.type === 'vocabOverlaySave') {
+    vocabOverlay = isVocabOverlay(message.overlay) ? message.overlay : emptyVocabOverlay();
+    reply({
+      type: 'vocabOverlaySaved',
+      overlay: vocabOverlay,
+      templates: templateSummariesWithOverlay(vocabOverlay)
+    });
     return;
   }
   if (message.type === 'templateDryRun') {

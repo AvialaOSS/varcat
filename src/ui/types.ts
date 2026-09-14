@@ -20,7 +20,6 @@ export type TemplateSummary = {
   summaryZh?: string;
   stub?: boolean;
   note?: string;
-  variantProp?: string | null;
   extras?: number;
   defaultCount: number;
   maxCount: number;
@@ -43,4 +42,10 @@ export type ModeBudgetRow = {
   needs: string[];
   has: string[];
   exists: boolean;
+};
+
+/** Session overlay for editable plan vocabulary (persisted in clientStorage). */
+export type VocabOverlay = {
+  version: 1;
+  axes: Record<string, Record<string, string[]>>;
 };

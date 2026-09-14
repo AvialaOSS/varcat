@@ -43,13 +43,14 @@ import {
   Typography
 } from '@aviala-design/spiral';
 import { copyText, formatApplied, formatFullPlan, formatReport, formatTemplatePlan } from './format';
+import { remapAxisSelection, VocabAxisEditor } from './VocabAxisEditor';
 import type {
-  Axis,
   AxisSelection,
   DryRunPath,
   ModeBudgetRow,
   NamespaceSummary,
-  TemplateSummary
+  TemplateSummary,
+  VocabOverlay
 } from './types';
 
 const GROUP_ZH: Record<string, string> = {
@@ -65,17 +66,18 @@ const GROUP_ZH: Record<string, string> = {
 /** Short enough that four steps fit the narrow iframe without wrapping. */
 const STEPS = [
   { label: '模板', lede: '按 Spiral 命名建变量空壳 — 只建路径，不填值。' },
-  { label: '配轴', lede: '勾选每个外观轴要展开的取值。' },
+  { label: '配轴', lede: '范式词表：勾选要展开的取值；双击改名，新建增词。' },
   { label: '预览', lede: '干跑结果 — 应用前核对路径。' },
   { label: '应用', lede: '路径与类型已写入，数值留给你填。' }
 ] as const;
+
+const emptyOverlay = (): VocabOverlay => ({ version: 1, axes: {} });
 
 /** Rows over this are dropped from the preview list to keep the panel responsive. */
 const PATH_LIST_LIMIT = 300;
 
 const groupLabel = (group: string) => GROUP_ZH[group] ?? group;
 const displayLabel = (template: TemplateSummary) => template.labelZh || template.label;
-const axisLabel = (axis: Axis) => axis.labelZh || axis.label;
 
 const post = (message: unknown) => parent.postMessage({ pluginMessage: message }, '*');
 
@@ -143,6 +145,7 @@ export function App() {
   const [step, setStep] = useState(1);
 
   const [templates, setTemplates] = useState<TemplateSummary[]>([]);
+  const [vocabOverlay, setVocabOverlay] = useState<VocabOverlay>(emptyOverlay);
   const [thresholds, setThresholds] = useState({ warn: 200, confirm: 500 });
   const [selected, setSelected] = useState<Map<string, AxisSelection>>(() => new Map());
   const [dryRunPaths, setDryRunPaths] = useState<DryRunPath[]>([]);
@@ -190,10 +193,13 @@ export function App() {
   );
 
   /**
-   * Editing the selection invalidates the dry-run: its path list no longer
-   * describes what Apply would write, so drop it and re-lock the preview step.
+   * Editing the selection or the closed vocabulary invalidates the dry-run: its
+   * path list no longer describes what Apply would write.
    */
-  const selectionKey = useMemo(() => JSON.stringify(selectionPayload()), [selectionPayload]);
+  const selectionKey = useMemo(
+    () => JSON.stringify({ selection: selectionPayload(), overlay: vocabOverlay }),
+    [selectionPayload, vocabOverlay]
+  );
   useEffect(() => {
     setDryRunPaths([]);
     setPlanStats(null);
@@ -208,6 +214,7 @@ export function App() {
 
       if (message.type === 'init') {
         setTemplates(message.templates);
+        setVocabOverlay(message.vocabOverlay ?? emptyOverlay());
         setThresholds(message.thresholds);
         unboundNote.current = message.unboundNote;
         setNamespaces(message.namespaces);
@@ -221,6 +228,12 @@ export function App() {
         setError(null);
         setApplyDisabled(true);
         setLog('还没有运行任何操作。');
+        return;
+      }
+
+      if (message.type === 'vocabOverlaySaved') {
+        setVocabOverlay(message.overlay ?? emptyOverlay());
+        if (Array.isArray(message.templates)) setTemplates(message.templates);
         return;
       }
 
@@ -395,6 +408,42 @@ export function App() {
       next.set(id, mutate({ axes: { ...current.axes }, includeExtras: current.includeExtras }));
       return next;
     });
+  };
+
+  /** Merge one axis list into the session overlay and ask the main thread to persist it. */
+  const persistAxisVocab = (
+    templateId: string,
+    slot: string,
+    values: string[],
+    remap?: { from: string; to: string }
+  ) => {
+    const axes = { ...vocabOverlay.axes };
+    const slots = { ...(axes[templateId] ?? {}) };
+    slots[slot] = [...values];
+    axes[templateId] = slots;
+    const next: VocabOverlay = { version: 1, axes };
+    setVocabOverlay(next);
+    setTemplates((prev) =>
+      prev.map((template) => {
+        if (template.id !== templateId || !template.axes) return template;
+        return {
+          ...template,
+          axes: template.axes.map((axis) =>
+            axis.slot === slot
+              ? {
+                  ...axis,
+                  values: [...values],
+                  default: axis.default.filter((value) => values.includes(value))
+                }
+              : axis
+          )
+        };
+      })
+    );
+    if (remap) {
+      updateSelection(templateId, (current) => remapAxisSelection(current, slot, remap));
+    }
+    post({ type: 'vocabOverlaySave', overlay: next });
   };
 
   const clearAll = () => {
@@ -619,6 +668,7 @@ export function App() {
                 onReset={(template) =>
                   setSelected((prev) => new Map(prev).set(template.id, defaultSelection(template)))
                 }
+                onPersistAxis={persistAxisVocab}
               />
             ) : null}
 
@@ -771,13 +821,20 @@ function AxisStep({
   selected,
   banner,
   onUpdate,
-  onReset
+  onReset,
+  onPersistAxis
 }: {
   picked: TemplateSummary[];
   selected: Map<string, AxisSelection>;
   banner: Banner | null;
   onUpdate: (id: string, mutate: (selection: AxisSelection) => AxisSelection) => void;
   onReset: (template: TemplateSummary) => void;
+  onPersistAxis: (
+    templateId: string,
+    slot: string,
+    values: string[],
+    remap?: { from: string; to: string }
+  ) => void;
 }) {
   const layers = picked.filter((template) => template.kind === 'layer');
   const components = picked.filter((template) => template.kind === 'component');
@@ -834,54 +891,33 @@ function AxisStep({
                 controls go in a single column child. */}
             <CardBody>
               <Stack gap="component" direction="column" className="vc-grow">
-                {template.variantProp ? (
-                  <Typography level="caption">
-                    外观轴取自 Spiral「{template.variantProp}」属性。
-                  </Typography>
-                ) : null}
+                <Typography level="caption">
+                  词表来自范式模板（可双击编辑或新建；改动保存在本机插件会话）。
+                </Typography>
                 {template.note ? <Typography level="caption">{template.note}</Typography> : null}
 
                 {(template.axes ?? []).map((axis) => {
                   const on = selection.axes[axis.slot] ?? [];
                   return (
-                    <Stack key={axis.slot} gap="inside" direction="column">
-                      <div className="vc-row vc-row--tight">
-                        <Typography level="caption" title={axis.note}>
-                          {axisLabel(axis)}
-                        </Typography>
-                        <Typography level="caption" className="vc-push" content="number">
-                          {on.length} / {axis.values.length}
-                        </Typography>
-                      </div>
-                      <div className="vc-row vc-row--tight">
-                        {axis.values.map((value) => {
-                          const active = on.includes(value);
-                          return (
-                            <Button
-                              key={value}
-                              mode={active ? 'second' : 'outline'}
-                              size="tiny"
-                              allRound
-                              aria-pressed={active}
-                              onClick={() =>
-                                onUpdate(template.id, (current) => {
-                                  const list = current.axes[axis.slot] ?? [];
-                                  current.axes[axis.slot] = list.includes(value)
-                                    ? list.filter((candidate) => candidate !== value)
-                                    : axis.values.filter(
-                                        (candidate) =>
-                                          list.includes(candidate) || candidate === value
-                                      );
-                                  return current;
-                                })
-                              }
-                            >
-                              {value}
-                            </Button>
-                          );
-                        })}
-                      </div>
-                    </Stack>
+                    <VocabAxisEditor
+                      key={axis.slot}
+                      axis={axis}
+                      selected={on}
+                      onToggleValue={(value) =>
+                        onUpdate(template.id, (current) => {
+                          const list = current.axes[axis.slot] ?? [];
+                          current.axes[axis.slot] = list.includes(value)
+                            ? list.filter((candidate) => candidate !== value)
+                            : axis.values.filter(
+                                (candidate) => list.includes(candidate) || candidate === value
+                              );
+                          return current;
+                        })
+                      }
+                      onReplaceValues={(values, remap) =>
+                        onPersistAxis(template.id, axis.slot, values, remap)
+                      }
+                    />
                   );
                 })}
 

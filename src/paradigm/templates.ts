@@ -219,7 +219,7 @@ const stubTemplate = (entry: SpiralCatalog['components'][number]): ComponentTemp
   axes: STUB_AXES,
   exclude: [],
   extras: [],
-  note: '占位轴来自 Spiral 目录。该组件尚未整理外观轴。',
+  note: '该组件尚未整理外观轴；当前词表为通用部位 × 状态（范式词表，可在配轴步编辑）。',
   stub: true
 });
 
@@ -321,21 +321,31 @@ export const expandCombos = (
 };
 
 /** Cheap size preview for the axis panel: no entries built, no validation run. */
-export const countSelection = (selection: TemplateSelection): number => {
-  const template = getTemplate(selection.id);
+export const countSelection = (
+  selection: TemplateSelection,
+  resolve: (id: string) => Template = getTemplate
+): number => {
+  const template = resolve(selection.id);
   if (!isComponentTemplate(template)) return template.count;
   const combos = expandCombos(template, selection.axes).paths.length;
   return combos + (selection.includeExtras ? template.extras.length : 0);
 };
 
-export const countSelections = (selections: TemplateSelection[]): number =>
-  selections.reduce((total, selection) => total + countSelection(selection), 0);
+export const countSelections = (
+  selections: TemplateSelection[],
+  resolve: (id: string) => Template = getTemplate
+): number => selections.reduce((total, selection) => total + countSelection(selection, resolve), 0);
 
 export type UnboundOptions = {
   /** Stamped into `Variable.description`; pass it explicitly to keep tests stable. */
   stamp?: string;
   /** Keep the shells out of the published team library until they carry a value. */
   hiddenFromPublishing?: boolean;
+  /**
+   * Resolve a template id to the instance used for expansion (e.g. session vocab
+   * overlay). Defaults to the committed paradigm templates.
+   */
+  resolve?: (id: string) => Template;
 };
 
 const monthStamp = () => new Date().toISOString().slice(0, 7);
@@ -351,7 +361,8 @@ export const expandSelection = (
   selection: TemplateSelection,
   options: UnboundOptions = {}
 ): PlanEntry[] => {
-  const template = getTemplate(selection.id);
+  const resolve = options.resolve ?? getTemplate;
+  const template = resolve(selection.id);
   const stamp = options.stamp ?? monthStamp();
   const note = unboundNote(template.id, stamp);
   const hiddenFromPublishing = options.hiddenFromPublishing === true;
@@ -472,6 +483,7 @@ export const expandTemplatePlan = (
   selections: TemplateSelection[],
   options: UnboundOptions = {}
 ): TemplatePlan => {
+  const resolve = options.resolve ?? getTemplate;
   const entries: PlanEntry[] = [];
   const counts: Record<string, number> = {};
   const invalid: ValidationResult[] = [];
@@ -479,7 +491,7 @@ export const expandTemplatePlan = (
   const seen = new Set<string>();
 
   for (const selection of selections) {
-    const template = getTemplate(selection.id);
+    const template = resolve(selection.id);
     const expanded = expandSelection(selection, options);
     counts[selection.id] = expanded.length;
 
@@ -502,44 +514,58 @@ export const expandTemplatePlan = (
   return { entries, counts, total: entries.length, invalid, excluded };
 };
 
-/** Template list payload for the UI: no entries, just what a row needs to render. */
-export const templateSummaries = () =>
-  templates.map((template) =>
-    isComponentTemplate(template)
-      ? {
-          id: template.id,
-          kind: 'component' as const,
-          label: template.spiral.displayName,
-          group: template.spiral.group,
-          collection: template.collection,
-          modes: template.modes,
-          shape: `${template.group}/${template.shape}`,
-          stub: template.stub,
-          note: template.note,
-          variantProp: template.spiral.variantProp ?? null,
-          extras: template.extras.length,
-          defaultCount: countSelection({ id: template.id }),
-          maxCount: expandCombos(
-            template,
-            template.axes.reduce<Record<string, string[]>>((acc, axis) => {
-              acc[axis.slot] = axis.values;
-              return acc;
-            }, {})
-          ).paths.length,
-          axes: template.axes
-        }
-      : {
-          id: template.id,
-          kind: 'layer' as const,
-          label: template.label,
-          labelZh: template.labelZh,
-          group: 'Foundation layer',
-          collection: template.collection,
-          modes: template.modes,
-          shape: template.shape,
-          summary: template.summary,
-          summaryZh: template.summaryZh,
-          defaultCount: template.count,
-          maxCount: template.count
-        }
-  );
+const summarizeTemplate = (template: Template) =>
+  isComponentTemplate(template)
+    ? {
+        id: template.id,
+        kind: 'component' as const,
+        label: template.spiral.displayName,
+        group: template.spiral.group,
+        collection: template.collection,
+        modes: template.modes,
+        shape: `${template.group}/${template.shape}`,
+        stub: template.stub,
+        note: template.note,
+        extras: template.extras.length,
+        defaultCount: expandCombos(
+          template,
+          template.axes.reduce<Record<string, string[]>>((acc, axis) => {
+            acc[axis.slot] = [...axis.default];
+            return acc;
+          }, {})
+        ).paths.length,
+        maxCount: expandCombos(
+          template,
+          template.axes.reduce<Record<string, string[]>>((acc, axis) => {
+            acc[axis.slot] = axis.values;
+            return acc;
+          }, {})
+        ).paths.length,
+        axes: template.axes
+      }
+    : {
+        id: template.id,
+        kind: 'layer' as const,
+        label: template.label,
+        labelZh: template.labelZh,
+        group: 'Foundation layer',
+        collection: template.collection,
+        modes: template.modes,
+        shape: template.shape,
+        summary: template.summary,
+        summaryZh: template.summaryZh,
+        defaultCount: template.count,
+        maxCount: template.count
+      };
+
+export type TemplateSummaryRow = ReturnType<typeof summarizeTemplate>;
+
+/**
+ * Template list payload for the UI: no entries, just what a row needs to render.
+ * Axis `values` are the plan closed vocabulary (template JSON), not Spiral cva props.
+ * Pass a `resolve` mapper (e.g. session vocab overlay) to merge edits over base lists.
+ */
+export const templateSummaries = (
+  resolve?: (template: Template) => Template
+): TemplateSummaryRow[] =>
+  templates.map((template) => summarizeTemplate(resolve ? resolve(template) : template));
